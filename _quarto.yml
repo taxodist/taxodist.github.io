@@ -3,7 +3,7 @@ project:
 
 website:
   title: "taxodist"
-  site-url: "https://rodrigosqrt3.github.io/taxodist-web/"
+  site-url: "https://taxodist.github.io/"
   description: "Taxonomic hierarchy distances and lineage analysis in R, Python, and Julia."
   favicon: images/taxodist_sepia.png
   open-graph: true

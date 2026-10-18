@@ -44,7 +44,7 @@ The fixed `taxobase` object is distributed for examples, tests, and comparisons 
 
 The R, Python, and Julia implementations are parts of the same software project and may be cited with a common project-level reference:
 
-> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version 0.9.0). Open-source software. <https://rodrigosqrt3.github.io/taxodist-web/>.
+> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version 0.9.0). Open-source software. <https://taxodist.github.io/>.
 
 In the methods section, identify the implementation used:
 
