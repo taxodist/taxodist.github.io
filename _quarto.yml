@@ -5,7 +5,7 @@ website:
   title: "taxodist"
   site-url: "https://taxodist.github.io/"
   description: "Taxonomic hierarchy distances and lineage analysis in R, Python, and Julia."
-  favicon: images/taxodist_sepia.png
+  favicon: images/favicon-192.png
   open-graph: true
   twitter-card: true
   page-navigation: true
