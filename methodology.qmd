@@ -9,6 +9,10 @@ subtitle: "Definition, mathematical properties, assumptions, and limitations of 
 
 The distance is defined from the position of the most recent common ancestor (MRCA) in those ordered lineages. It is therefore a property of a **taxonomic classification**, not a direct measurement of evolutionary process.
 
+Lineages are read from the structured hierarchy of each Taxonomicon page: every node is the scientific name marked up by the page itself, and the rank recorded for it is retained. Author strings, rank labels, and extinction or type markers are therefore not part of node names. Pages without the structured block are parsed from text by extracting the scientific name at the start of each line. This parser, introduced in version 1.0.0, is identical in the three implementations.
+
+The reciprocal distance defined below is the default. Three alternatives are described under [Alternative metrics](#alternative-metrics).
+
 ## Formal definition
 
 Let $L_A = (a_1, a_2, \ldots, a_m)$ and $L_B = (b_1, b_2, \ldots, b_n)$ be the ordered lineages of nodes $A$ and $B$. Define the common-prefix depth as
@@ -171,6 +175,98 @@ all(
 
 For an ultrametric triangle, the two largest pairwise distances are equal. The checks above allow a small numerical tolerance.
 
+## Alternative metrics
+
+The reciprocal distance weights shallow divergences heavily: two taxa whose MRCA is at depth 2 are at distance 0.5, while MRCAs at depths 40 and 41 give 0.025 and 0.024. It is also sensitive to the uneven resolution of the classification: in The Taxonomicon, vertebrate lineages are typically several times deeper than bacterial ones, so equal values do not correspond to equivalent taxonomic levels in different groups.
+
+The `metric` argument offers three alternatives. With $h$ the MRCA depth and $d_A$, $d_B$ the depths of the two lineages:
+
+| Metric | Definition | Properties |
+|---|---|---|
+| `"reciprocal"` (default) | $1/h$ | Ultrametric |
+| `"path"` | $d_A + d_B - 2h$ | Tree metric (number of edges); not an ultrametric when depths differ |
+| `"wu_palmer"` | $1 - 2h/(d_A + d_B)$ | In $[0,1)$; normalized by depth; not guaranteed to satisfy the triangle inequality |
+| `"ranked"` | Half the path through the standard ranks only | Clarke and Warwick's step weights |
+
+Every metric is zero for identical lineages. Lineages without a shared root have infinite distance, except under `"wu_palmer"`, where their distance is 1. The ultrametric property and the tree representation described on this page apply to the reciprocal distance.
+
+The `"ranked"` metric reduces each lineage to its root, the nodes of the Linnaean ranks kingdom, phylum, class, order, family, genus, and species, and the queried taxon. Unranked clades, which make up most of the nodes of richly resolved groups, are ignored. For two species, the distance is the number of rank levels up to their shared rank: 1 in the same genus, 2 in the same family, and so on. The rank levels can be changed (`taxodist.rank_levels` in R, `taxodist.distance.RANK_LEVELS` in Python, `Taxodist.RANK_LEVELS[]` in Julia). The Taxonomicon follows current phylogenetic classifications, so that, for example, birds are the subclass Aves of the class Reptilia.
+
+::: {.panel-tabset}
+
+### R
+
+```r
+standard <- c(NA, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
+lineages <- list(
+  Panthera = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"),
+  Felis    = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"),
+  Canis    = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"),
+  Homo     = c("Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"),
+  Musca    = c("Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca")
+)
+example <- taxo_from_lineages(
+  lineages,
+  ranks = setNames(rep(list(standard), length(lineages)), names(lineages))
+)
+
+for (metric in c("reciprocal", "path", "wu_palmer", "ranked")) {
+  cat("\n", metric, "\n")
+  print(round(distance_matrix(example, metric = metric, progress = FALSE), 3))
+}
+```
+
+### Python
+
+```python
+import taxodist as td
+
+standard = [None, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
+lineages = {
+    "Panthera": ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"],
+    "Felis":    ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Canis":    ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Homo":     ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Musca":    ["Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca"],
+}
+example = td.taxo_from_lineages(lineages, ranks={name: standard for name in lineages})
+
+for metric in ["reciprocal", "path", "wu_palmer", "ranked"]:
+    print(metric)
+    print(td.distance_matrix(example, metric=metric, progress=False).round(3))
+```
+
+### Julia
+
+```julia
+using Taxodist
+
+standard = [missing, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
+lineages = [
+    "Panthera" => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"],
+    "Felis"    => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Canis"    => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Homo"     => ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Musca"    => ["Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca"],
+]
+example = taxo_from_lineages(lineages; ranks=[label => standard for (label, _) in lineages])
+
+for metric in ["reciprocal", "path", "wu_palmer", "ranked"]
+    println(metric)
+    display(round.(Matrix(distance_matrix(example; metric=metric, progress=false)); digits=3))
+end
+```
+
+:::
+
+Rankings of pairs are the same under all four metrics within a single, evenly resolved lineage set such as this one; they differ when lineages of very different depths are compared.
+
+## Taxonomic distinctness
+
+`taxo_distinctness()` computes the indices of Warwick and Clarke: taxonomic diversity $\Delta$, taxonomic distinctness $\Delta^*$, average taxonomic distinctness $\Delta^+$, and its variation $\Lambda^+$. With the `"ranked"` metric they reproduce the classical definitions based on Linnaean ranks and agree with `vegan::taxondive()`; with the other metrics they use the full resolution of the classification.
+
+$\Delta^+$ and $\Lambda^+$ use presence only and, unlike species richness, their expected values do not depend on sampling effort. `taxo_distinctness_test()` therefore compares a sample with random samples of the same number of taxa drawn from a master list. A $\Delta^+$ below the lower limit indicates that the sample is less taxonomically distinct than expected from the pool. Worked examples are given in the [guide](getting-started.qmd#taxonomic-diversity-and-distinctness) and in [Statistical Applications](statistical-applications.qmd#taxonomic-diversity-and-distinctness).
+
 ## Dependence on the source classification
 
 The distance depends on the number and arrangement of nodes recorded before the MRCA. It is therefore sensitive to:
@@ -179,7 +275,7 @@ The distance depends on the number and arrangement of nodes recorded before the 
 - alternative classification systems;
 - insertion or removal of intermediate clades;
 - unequal resolution among taxonomic groups;
-- lineage-cleaning decisions;
+- lineage-parsing and cleaning decisions (the structured parser of version 1.0.0 changed lineage depths, and therefore distances, for many taxa compared with earlier versions);
 - ambiguous name resolution.
 
 Adding an intermediate node to the shared prefix increases MRCA depth and decreases the numerical distance. Adding nodes only below the MRCA does not affect that pair.
@@ -190,7 +286,7 @@ Distances should consequently be compared only when derived from compatible line
 
 ### Ambiguous names
 
-A scientific name may correspond to several biological entries. Use `taxo_search()` to inspect candidates and supply a numeric Taxonomicon ID when a particular taxonomic concept is required.
+A scientific name may correspond to several biological entries. Entries marked as invalid, rejected, nude, or illegitimate names are considered only after the others, and `taxo_resolve()` can restrict candidates to a clade with `within`. Use `taxo_search()` to inspect candidates and supply a numeric Taxonomicon ID when a particular taxonomic concept is required.
 
 ### Missing lineages
 
@@ -239,7 +335,7 @@ Live lineages may change when The Taxonomicon is updated. For empirical work, re
 4. treatment of homonyms and redirects;
 5. missing or excluded taxa;
 6. lineage source and cleaning settings;
-7. the distance definition;
+7. the distance metric (and, for `"ranked"`, the rank levels);
 8. downstream clustering, ordination, or permutation settings.
 
 Use `save_cache()` when the exact retrieved lineages must be reused. Cache files are language-specific (`.rds`, `.pkl`, and `.json`). Use `taxobase` or `load_taxobase()` when a fixed, packaged example is preferable to a live query. When an analysis is repeated, `compare_bundles()` identifies which lineages, identifiers, and distances changed between the two retrievals.
@@ -248,7 +344,9 @@ Use `save_cache()` when the exact retrieved lineages must be reused. Cache files
 
 A concise description may be adapted as follows:
 
-> Ordered taxonomic lineages were resolved from The Taxonomicon using `taxodist` version 0.9.0. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.
+> Ordered taxonomic lineages were resolved from The Taxonomicon using `taxodist` version 1.0.0. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.
+
+If another metric is used, replace the distance sentence with its definition, for example: "Distance was defined as half the number of steps between Linnaean rank levels (kingdom to species) separating the two taxa through their lowest shared rank (Clarke and Warwick, 1998)."
 
 Report retrieval dates, unresolved taxa, and downstream analysis details separately.
 

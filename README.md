@@ -2,7 +2,7 @@
 
 Documentation website for [`taxodist`](https://taxodist.github.io/), an open-source project for taxonomic hierarchy distances and lineage analysis in R, Python, and Julia.
 
-The current coordinated release is **0.9.0**.
+The current coordinated release is **1.0.0**, the first stable release.
 
 The site documents how `taxodist` retrieves ordered lineages from [The Taxonomicon](http://taxonomicon.taxonomy.nl), compares taxa through the depth of their most recent common ancestor, and integrates the resulting distance objects with multivariate analysis workflows.
 
@@ -13,7 +13,8 @@ The site documents how `taxodist` retrieves ordered lineages from [The Taxonomic
 The website includes:
 
 - installation and introductory workflows for R, Python, and Julia;
-- the definition, properties, assumptions, and limitations of the distance measure;
+- the definition, properties, assumptions, and limitations of the distance measure and of the alternative path-length, Wu–Palmer, and rank-based metrics;
+- lineage node ranks and the taxonomic diversity and distinctness indices of Clarke and Warwick;
 - statistical applications using clustering, ordination, taxonomic distinctness, Mantel tests, and PERMANOVA;
 - a cross-language compatibility guide;
 - auditable name-resolution and fully offline lineage workflows;

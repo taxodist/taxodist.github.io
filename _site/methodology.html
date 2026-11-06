@@ -63,7 +63,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./images/taxodist_sepia.png" rel="icon" type="image/png">
+<link href="./images/favicon-192.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -220,6 +220,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#consequence" id="toc-consequence" class="nav-link" data-scroll-target="#consequence">Consequence</a></li>
   </ul></li>
   <li><a href="#verification-with-the-offline-reference-matrix" id="toc-verification-with-the-offline-reference-matrix" class="nav-link" data-scroll-target="#verification-with-the-offline-reference-matrix">Verification with the offline reference matrix</a></li>
+  <li><a href="#alternative-metrics" id="toc-alternative-metrics" class="nav-link" data-scroll-target="#alternative-metrics">Alternative metrics</a></li>
+  <li><a href="#taxonomic-distinctness" id="toc-taxonomic-distinctness" class="nav-link" data-scroll-target="#taxonomic-distinctness">Taxonomic distinctness</a></li>
   <li><a href="#dependence-on-the-source-classification" id="toc-dependence-on-the-source-classification" class="nav-link" data-scroll-target="#dependence-on-the-source-classification">Dependence on the source classification</a></li>
   <li><a href="#ambiguous-missing-and-disconnected-lineages" id="toc-ambiguous-missing-and-disconnected-lineages" class="nav-link" data-scroll-target="#ambiguous-missing-and-disconnected-lineages">Ambiguous, missing, and disconnected lineages</a>
   <ul class="collapse">
@@ -228,6 +230,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#disconnected-roots" id="toc-disconnected-roots" class="nav-link" data-scroll-target="#disconnected-roots">Disconnected roots</a></li>
   </ul></li>
   <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
+  <li><a href="#tree-representation-of-the-classification" id="toc-tree-representation-of-the-classification" class="nav-link" data-scroll-target="#tree-representation-of-the-classification">Tree representation of the classification</a></li>
   <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
   <li><a href="#recommended-methods-statement" id="toc-recommended-methods-statement" class="nav-link" data-scroll-target="#recommended-methods-statement">Recommended methods statement</a></li>
   </ul>
@@ -258,16 +261,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="scope">Scope</h2>
 <p><code>taxodist</code> represents a taxon as an ordered sequence of hierarchy nodes retrieved from The Taxonomicon. The first element is the retained root and the final element is the queried node.</p>
 <p>The distance is defined from the position of the most recent common ancestor (MRCA) in those ordered lineages. It is therefore a property of a <strong>taxonomic classification</strong>, not a direct measurement of evolutionary process.</p>
+<p>Lineages are read from the structured hierarchy of each Taxonomicon page: every node is the scientific name marked up by the page itself, and the rank recorded for it is retained. Author strings, rank labels, and extinction or type markers are therefore not part of node names. Pages without the structured block are parsed from text by extracting the scientific name at the start of each line. This parser, introduced in version 1.0.0, is identical in the three implementations.</p>
+<p>The reciprocal distance defined below is the default. Three alternatives are described under <a href="#alternative-metrics">Alternative metrics</a>.</p>
 </section>
 <section id="formal-definition" class="level2">
 <h2 class="anchored" data-anchor-id="formal-definition">Formal definition</h2>
-<p>Let</p>
-<p><span class="math display">\[
-L_A = (a_1, a_2, \ldots, a_m)
-\qquad\text{and}\qquad
-L_B = (b_1, b_2, \ldots, b_n)
-\]</span></p>
-<p>be the ordered lineages of nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. Define the common-prefix depth as</p>
+<p>Let <span class="math inline">\(L_A = (a_1, a_2, \ldots, a_m)\)</span> and <span class="math inline">\(L_B = (b_1, b_2, \ldots, b_n)\)</span> be the ordered lineages of nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. Define the common-prefix depth as</p>
 <p><span class="math display">\[
 h(A,B) = \max\left\{k : a_i=b_i \text{ for every } i \leq k\right\}.
 \]</span></p>
@@ -318,11 +317,11 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 \]</span></p>
 <p>For distinct nodes, taking positive reciprocals reverses the inequality:</p>
 <p><span class="math display">\[
+\begin{aligned}
 \frac{1}{h(A,C)}
-\leq
-\frac{1}{\min\{h(A,B),h(B,C)\}}
-=
-\max\left\{\frac{1}{h(A,B)},\frac{1}{h(B,C)}\right\}.
+&amp;\leq \frac{1}{\min\{h(A,B),h(B,C)\}} \\
+&amp;= \max\left\{\frac{1}{h(A,B)},\frac{1}{h(B,C)}\right\}.
+\end{aligned}
 \]</span></p>
 <p>Cases involving identical nodes follow immediately because their distance is zero. Thus the strong triangle inequality holds.</p>
 </section>
@@ -401,6 +400,114 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 </div>
 <p>For an ultrametric triangle, the two largest pairwise distances are equal. The checks above allow a small numerical tolerance.</p>
 </section>
+<section id="alternative-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="alternative-metrics">Alternative metrics</h2>
+<p>The reciprocal distance weights shallow divergences heavily: two taxa whose MRCA is at depth 2 are at distance 0.5, while MRCAs at depths 40 and 41 give 0.025 and 0.024. It is also sensitive to the uneven resolution of the classification: in The Taxonomicon, vertebrate lineages are typically several times deeper than bacterial ones, so equal values do not correspond to equivalent taxonomic levels in different groups.</p>
+<p>The <code>metric</code> argument offers three alternatives. With <span class="math inline">\(h\)</span> the MRCA depth and <span class="math inline">\(d_A\)</span>, <span class="math inline">\(d_B\)</span> the depths of the two lineages:</p>
+<table class="table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Definition</th>
+<th>Properties</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"reciprocal"</code> (default)</td>
+<td><span class="math inline">\(1/h\)</span></td>
+<td>Ultrametric</td>
+</tr>
+<tr class="even">
+<td><code>"path"</code></td>
+<td><span class="math inline">\(d_A + d_B - 2h\)</span></td>
+<td>Tree metric (number of edges); not an ultrametric when depths differ</td>
+</tr>
+<tr class="odd">
+<td><code>"wu_palmer"</code></td>
+<td><span class="math inline">\(1 - 2h/(d_A + d_B)\)</span></td>
+<td>In <span class="math inline">\([0,1)\)</span>; normalized by depth; not guaranteed to satisfy the triangle inequality</td>
+</tr>
+<tr class="even">
+<td><code>"ranked"</code></td>
+<td>Half the path through the standard ranks only</td>
+<td>Clarke and Warwick’s step weights</td>
+</tr>
+</tbody>
+</table>
+<p>Every metric is zero for identical lineages. Lineages without a shared root have infinite distance, except under <code>"wu_palmer"</code>, where their distance is 1. The ultrametric property and the tree representation described on this page apply to the reciprocal distance.</p>
+<p>The <code>"ranked"</code> metric reduces each lineage to its root, the nodes of the Linnaean ranks kingdom, phylum, class, order, family, genus, and species, and the queried taxon. Unranked clades, which make up most of the nodes of richly resolved groups, are ignored. For two species, the distance is the number of rank levels up to their shared rank: 1 in the same genus, 2 in the same family, and so on. The rank levels can be changed (<code>taxodist.rank_levels</code> in R, <code>taxodist.distance.RANK_LEVELS</code> in Python, <code>Taxodist.RANK_LEVELS[]</code> in Julia). The Taxonomicon follows current phylogenetic classifications, so that, for example, birds are the subclass Aves of the class Reptilia.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Python</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">Julia</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>standard <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="st">"Kingdom"</span>, <span class="st">"Phylum"</span>, <span class="st">"Class"</span>, <span class="st">"Order"</span>, <span class="st">"Family"</span>, <span class="st">"Genus"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>lineages <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Panthera =</span> <span class="fu">c</span>(<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Panthera"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Felis    =</span> <span class="fu">c</span>(<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Felis"</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Canis    =</span> <span class="fu">c</span>(<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Canidae"</span>, <span class="st">"Canis"</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Homo     =</span> <span class="fu">c</span>(<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Primates"</span>, <span class="st">"Hominidae"</span>, <span class="st">"Homo"</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Musca    =</span> <span class="fu">c</span>(<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Arthropoda"</span>, <span class="st">"Insecta"</span>, <span class="st">"Diptera"</span>, <span class="st">"Muscidae"</span>, <span class="st">"Musca"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> <span class="fu">taxo_from_lineages</span>(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  lineages,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">ranks =</span> <span class="fu">setNames</span>(<span class="fu">rep</span>(<span class="fu">list</span>(standard), <span class="fu">length</span>(lineages)), <span class="fu">names</span>(lineages))</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (metric <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"reciprocal"</span>, <span class="st">"path"</span>, <span class="st">"wu_palmer"</span>, <span class="st">"ranked"</span>)) {</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, metric, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">round</span>(<span class="fu">distance_matrix</span>(example, <span class="at">metric =</span> metric, <span class="at">progress =</span> <span class="cn">FALSE</span>), <span class="dv">3</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> taxodist <span class="im">as</span> td</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>standard <span class="op">=</span> [<span class="va">None</span>, <span class="st">"Kingdom"</span>, <span class="st">"Phylum"</span>, <span class="st">"Class"</span>, <span class="st">"Order"</span>, <span class="st">"Family"</span>, <span class="st">"Genus"</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>lineages <span class="op">=</span> {</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Panthera"</span>: [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Panthera"</span>],</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Felis"</span>:    [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Felis"</span>],</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Canis"</span>:    [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Canidae"</span>, <span class="st">"Canis"</span>],</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Homo"</span>:     [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Primates"</span>, <span class="st">"Hominidae"</span>, <span class="st">"Homo"</span>],</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Musca"</span>:    [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Arthropoda"</span>, <span class="st">"Insecta"</span>, <span class="st">"Diptera"</span>, <span class="st">"Muscidae"</span>, <span class="st">"Musca"</span>],</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> td.taxo_from_lineages(lineages, ranks<span class="op">=</span>{name: standard <span class="cf">for</span> name <span class="kw">in</span> lineages})</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metric <span class="kw">in</span> [<span class="st">"reciprocal"</span>, <span class="st">"path"</span>, <span class="st">"wu_palmer"</span>, <span class="st">"ranked"</span>]:</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(metric)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(td.distance_matrix(example, metric<span class="op">=</span>metric, progress<span class="op">=</span><span class="va">False</span>).<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Taxodist</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>standard <span class="op">=</span> [<span class="cn">missing</span>, <span class="st">"Kingdom"</span>, <span class="st">"Phylum"</span>, <span class="st">"Class"</span>, <span class="st">"Order"</span>, <span class="st">"Family"</span>, <span class="st">"Genus"</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>lineages <span class="op">=</span> [</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Panthera"</span> <span class="op">=&gt;</span> [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Panthera"</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Felis"</span>    <span class="op">=&gt;</span> [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Felidae"</span>, <span class="st">"Felis"</span>],</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Canis"</span>    <span class="op">=&gt;</span> [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Carnivora"</span>, <span class="st">"Canidae"</span>, <span class="st">"Canis"</span>],</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Homo"</span>     <span class="op">=&gt;</span> [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Chordata"</span>, <span class="st">"Mammalia"</span>, <span class="st">"Primates"</span>, <span class="st">"Hominidae"</span>, <span class="st">"Homo"</span>],</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Musca"</span>    <span class="op">=&gt;</span> [<span class="st">"Biota"</span>, <span class="st">"Animalia"</span>, <span class="st">"Arthropoda"</span>, <span class="st">"Insecta"</span>, <span class="st">"Diptera"</span>, <span class="st">"Muscidae"</span>, <span class="st">"Musca"</span>],</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> <span class="fu">taxo_from_lineages</span>(lineages; ranks<span class="op">=</span>[label <span class="op">=&gt;</span> standard for (label, _) <span class="kw">in</span> lineages])</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metric <span class="kw">in</span> [<span class="st">"reciprocal"</span>, <span class="st">"path"</span>, <span class="st">"wu_palmer"</span>, <span class="st">"ranked"</span>]</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">println</span>(metric)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">display</span>(<span class="fu">round</span>.(<span class="fu">Matrix</span>(<span class="fu">distance_matrix</span>(example; metric<span class="op">=</span>metric, progress<span class="op">=</span><span class="cn">false</span>)); digits<span class="op">=</span><span class="fl">3</span>))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>Rankings of pairs are the same under all four metrics within a single, evenly resolved lineage set such as this one; they differ when lineages of very different depths are compared.</p>
+</section>
+<section id="taxonomic-distinctness" class="level2">
+<h2 class="anchored" data-anchor-id="taxonomic-distinctness">Taxonomic distinctness</h2>
+<p><code>taxo_distinctness()</code> computes the indices of Warwick and Clarke: taxonomic diversity <span class="math inline">\(\Delta\)</span>, taxonomic distinctness <span class="math inline">\(\Delta^*\)</span>, average taxonomic distinctness <span class="math inline">\(\Delta^+\)</span>, and its variation <span class="math inline">\(\Lambda^+\)</span>. With the <code>"ranked"</code> metric they reproduce the classical definitions based on Linnaean ranks and agree with <code>vegan::taxondive()</code>; with the other metrics they use the full resolution of the classification.</p>
+<p><span class="math inline">\(\Delta^+\)</span> and <span class="math inline">\(\Lambda^+\)</span> use presence only and, unlike species richness, their expected values do not depend on sampling effort. <code>taxo_distinctness_test()</code> therefore compares a sample with random samples of the same number of taxa drawn from a master list. A <span class="math inline">\(\Delta^+\)</span> below the lower limit indicates that the sample is less taxonomically distinct than expected from the pool. Worked examples are given in the <a href="./getting-started.html#taxonomic-diversity-and-distinctness">guide</a> and in <a href="./statistical-applications.html#taxonomic-diversity-and-distinctness">Statistical Applications</a>.</p>
+</section>
 <section id="dependence-on-the-source-classification" class="level2">
 <h2 class="anchored" data-anchor-id="dependence-on-the-source-classification">Dependence on the source classification</h2>
 <p>The distance depends on the number and arrangement of nodes recorded before the MRCA. It is therefore sensitive to:</p>
@@ -409,7 +516,7 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 <li>alternative classification systems;</li>
 <li>insertion or removal of intermediate clades;</li>
 <li>unequal resolution among taxonomic groups;</li>
-<li>lineage-cleaning decisions;</li>
+<li>lineage-parsing and cleaning decisions (the structured parser of version 1.0.0 changed lineage depths, and therefore distances, for many taxa compared with earlier versions);</li>
 <li>ambiguous name resolution.</li>
 </ul>
 <p>Adding an intermediate node to the shared prefix increases MRCA depth and decreases the numerical distance. Adding nodes only below the MRCA does not affect that pair.</p>
@@ -419,7 +526,7 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 <h2 class="anchored" data-anchor-id="ambiguous-missing-and-disconnected-lineages">Ambiguous, missing, and disconnected lineages</h2>
 <section id="ambiguous-names" class="level3">
 <h3 class="anchored" data-anchor-id="ambiguous-names">Ambiguous names</h3>
-<p>A scientific name may correspond to several biological entries. Use <code>taxo_search()</code> to inspect candidates and supply a numeric Taxonomicon ID when a particular taxonomic concept is required.</p>
+<p>A scientific name may correspond to several biological entries. Entries marked as invalid, rejected, nude, or illegitimate names are considered only after the others, and <code>taxo_resolve()</code> can restrict candidates to a clade with <code>within</code>. Use <code>taxo_search()</code> to inspect candidates and supply a numeric Taxonomicon ID when a particular taxonomic concept is required.</p>
 </section>
 <section id="missing-lineages" class="level3">
 <h3 class="anchored" data-anchor-id="missing-lineages">Missing lineages</h3>
@@ -428,7 +535,7 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 <section id="disconnected-roots" class="level3">
 <h3 class="anchored" data-anchor-id="disconnected-roots">Disconnected roots</h3>
 <p>Valid biological lineages retrieved and cleaned from The Taxonomicon retain <code>Biota</code> as their shared root. An infinite distance is therefore not expected during ordinary Taxonomicon use. It remains a defensive result for supplied or malformed lineages with no common initial node; this differs from a missing lineage because both inputs exist but are disconnected under the retained representation.</p>
-<p>Clustering, ordination, and heatmap methods require a finite, complete matrix. Version 0.8.0 checks these conditions and returns an informative fallback object when they are not satisfied.</p>
+<p>Clustering, ordination, and heatmap methods require a finite, complete matrix. The implementations check these conditions and return an informative fallback object when they are not satisfied.</p>
 </section>
 </section>
 <section id="interpretation" class="level2">
@@ -444,6 +551,16 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 </ul>
 <p>A clustering dendrogram constructed from these values summarizes the classification-depth matrix. Conversion to class <code>phylo</code> changes the data representation, not the evidential basis of the tree.</p>
 </section>
+<section id="tree-representation-of-the-classification" class="level2">
+<h2 class="anchored" data-anchor-id="tree-representation-of-the-classification">Tree representation of the classification</h2>
+<p>Because the distance is an ultrametric, the supplied taxa can be represented exactly by a rooted tree in which every pairwise distance equals the patristic distance between the corresponding tips. <code>taxo_tree()</code> constructs this tree directly from the lineages rather than by clustering.</p>
+<p>Internal nodes correspond to clades at which the supplied taxa diverge; clades with a single descendant among the supplied taxa are omitted. A clade at depth <span class="math inline">\(h\)</span> is placed at height <span class="math inline">\(1/(2h)\)</span> and tips at height zero. For two taxa whose MRCA has depth <span class="math inline">\(h\)</span>, the path between them therefore has length</p>
+<p><span class="math display">\[
+\frac{1}{2h} + \frac{1}{2h} = \frac{1}{h} = d(A,B).
+\]</span></p>
+<p>A taxon that is an ancestor of another supplied taxon is attached to its clade node by a branch of length <span class="math inline">\(1/(2h)\)</span>, and taxa with identical lineages are joined at height zero, which preserves distances of <span class="math inline">\(1/h\)</span> and <span class="math inline">\(0\)</span> respectively.</p>
+<p>Average-linkage clustering of an ultrametric matrix recovers the same hierarchy of distance levels, but <code>stats::hclust()</code> and comparable routines resolve tied levels into a sequence of binary merges. The tree built from the lineages instead keeps polytomies and labels each split with its clade name. Both are representations of the classification; neither is a phylogenetic estimate, and branch lengths are not evolutionary times.</p>
+</section>
 <section id="reproducibility" class="level2">
 <h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
 <p>Live lineages may change when The Taxonomicon is updated. For empirical work, record:</p>
@@ -454,17 +571,18 @@ h(A,C) \geq \min\{h(A,B),h(B,C)\}.
 <li>treatment of homonyms and redirects;</li>
 <li>missing or excluded taxa;</li>
 <li>lineage source and cleaning settings;</li>
-<li>the distance definition;</li>
+<li>the distance metric (and, for <code>"ranked"</code>, the rank levels);</li>
 <li>downstream clustering, ordination, or permutation settings.</li>
 </ol>
-<p>Use <code>save_cache()</code> when the exact retrieved lineages must be reused. Cache files are language-specific (<code>.rds</code>, <code>.pkl</code>, and <code>.json</code>). Use <code>taxobase</code> or <code>load_taxobase()</code> when a fixed, packaged example is preferable to a live query.</p>
+<p>Use <code>save_cache()</code> when the exact retrieved lineages must be reused. Cache files are language-specific (<code>.rds</code>, <code>.pkl</code>, and <code>.json</code>). Use <code>taxobase</code> or <code>load_taxobase()</code> when a fixed, packaged example is preferable to a live query. When an analysis is repeated, <code>compare_bundles()</code> identifies which lineages, identifiers, and distances changed between the two retrievals.</p>
 </section>
 <section id="recommended-methods-statement" class="level2">
 <h2 class="anchored" data-anchor-id="recommended-methods-statement">Recommended methods statement</h2>
 <p>A concise description may be adapted as follows:</p>
 <blockquote class="blockquote">
-<p>Ordered taxonomic lineages were resolved from The Taxonomicon using <code>taxodist</code> version 0.8.0. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.</p>
+<p>Ordered taxonomic lineages were resolved from The Taxonomicon using <code>taxodist</code> version 1.0.0. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.</p>
 </blockquote>
+<p>If another metric is used, replace the distance sentence with its definition, for example: “Distance was defined as half the number of steps between Linnaean rank levels (kingdom to species) separating the two taxa through their lowest shared rank (Clarke and Warwick, 1998).”</p>
 <p>Report retrieval dates, unresolved taxa, and downstream analysis details separately.</p>
 <p><a href="./statistical-applications.html" class="btn btn-outline-primary" role="button">Continue to Statistical Applications →</a></p>
 
@@ -823,7 +941,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">taxodist 0.8.0</div>   
+    <div class="nav-footer-left">taxodist 1.0.0</div>   
     <div class="nav-footer-center">
       &nbsp;
     </div>

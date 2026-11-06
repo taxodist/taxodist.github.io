@@ -10,7 +10,7 @@ toc: false
 
 **Taxonomic hierarchy distances and lineage analysis in R, Python, and Julia**
 
-`taxodist` retrieves ordered taxonomic lineages, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix.
+`taxodist` retrieves ordered taxonomic lineages and the ranks of their nodes, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix. Path-length, Wu–Palmer, and rank-based distances and the taxonomic distinctness indices of Clarke and Warwick are also available.
 
 [Introduction and usage](getting-started.qmd) · [Methodology](methodology.qmd) · [Function reference](reference.qmd) · [Web application](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/)
 :::
@@ -22,7 +22,7 @@ toc: false
 :::
 
 ::: {.release-meta}
-**Current coordinated release: 0.9.0** (R, Python, and Julia)
+**Current coordinated release: 1.0.0** (R, Python, and Julia) — first stable release
 
 [![CRAN status](https://img.shields.io/cran/v/taxodist?color=2f855a)](https://cran.r-project.org/package=taxodist) [![PyPI version](https://img.shields.io/pypi/v/taxodist?color=2f855a)](https://pypi.org/project/taxodist) [![Julia version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Frodrigosqrt3%2FTaxodist.jl%2Fmain%2FProject.toml&query=%24.version&prefix=v&label=julia&color=2f855a)](https://platform.juliahub.com/ui/Packages/General/Taxodist/)
 :::
@@ -39,7 +39,7 @@ d(A,B)=
 \end{cases}
 $$
 
-A deeper shared ancestor produces a smaller distance. Zero is reserved for identical hierarchy nodes; distinct ancestor--descendant nodes retain a positive distance.
+A deeper shared ancestor produces a smaller distance. Zero is reserved for identical hierarchy nodes; distinct ancestor--descendant nodes retain a positive distance. This reciprocal distance is the default; the `metric` argument selects the path length, the Wu–Palmer distance, or a rank-based distance instead.
 
 ::: {.callout-important title="Classification distance, not evolutionary distance"}
 These values describe separation within a recorded classification. They are **not** evolutionary time, genetic distance, morphological divergence, phylogenetic branch length, or evidence that a particular phylogeny is correct.
@@ -47,18 +47,18 @@ These values describe separation within a recorded classification. They are **no
 
 [Detailed definition and assumptions](methodology.qmd)
 
-## Version 0.9.0
+## Version 1.0.0
 
-Version 0.9.0 is released simultaneously for R, Python, and Julia. The distance definition is unchanged; the release corrects several retrieval and caching errors and adds tools for trees, set comparisons, and repeated analyses.
+Version 1.0.0 is the first stable release, published simultaneously for R, Python, and Julia. The default distance, the alternative metrics, and the bundle format (schema 1.1) are now stable: later 1.x releases keep their definitions and continue to read bundles written by this version.
 
-- **Consistent resolution.** `taxo_resolve()` now truncates each lineage exactly as `get_lineage()` does, so matrices computed from names and from their resolution record are identical.
-- **Classification trees.** `taxo_tree()` builds a tree directly from the lineages, with named clades as internal nodes and branch lengths whose patristic distances reproduce `distance_matrix()`.
-- **Distances between two sets.** `cross_distances()` returns the rectangular matrix between, for example, community members and reference taxa.
-- **Comparison of analyses.** `compare_bundles()` reports which taxa changed identifier, status, or lineage between two bundles, and which distances changed.
-- **Name handling.** Whitespace and letter case in queried names are normalized, and the new `within` argument restricts homonym candidates to a clade.
-- **Robustness and speed.** Requests are retried after transient failures, coverage checks report an unknown status when the server cannot be reached, and matrix construction is vectorized.
+- **New lineage parser.** Lineages are read from the structure of The Taxonomicon page rather than from its text, so author strings, rank labels, and markers can no longer leak into, or remove, lineage nodes. **Distances can differ from earlier versions.**
+- **Ranks.** The rank of every lineage node is retrieved and cached with the lineage. `lineage_ranks()` returns each node with its rank and depth, and resolutions store the ranks.
+- **Distance metrics.** A `metric` argument selects `"reciprocal"` (default, unchanged), `"path"`, `"wu_palmer"`, or `"ranked"` (Clarke and Warwick's step weights).
+- **Taxonomic distinctness.** `taxo_distinctness()` computes Δ, Δ\*, Δ+, and Λ+ (agreeing with `vegan::taxondive()`), and `taxo_distinctness_test()` compares a sample with random draws from a species pool.
+- **Bundle schema 1.1.** Bundles record the metric and the lineage ranks; schema 1.0 bundles are still read.
+- **Gentler on the server.** Consecutive requests are spaced by at least 0.25 s, and `taxonomicon_available()` checks quickly whether the server can be reached.
 
-See the [changelog](news.qmd) for the complete list, including behavior changes.
+See the [changelog](news.qmd) for the complete list, including breaking changes.
 
 ## One workflow, three languages
 
@@ -121,10 +121,11 @@ write_taxodist_bundle(bundle, "analysis.taxodist.json")
 
 | Goal | Main functions |
 |---|---|
-| Retrieve or search live taxonomy | `get_lineage()`, `get_lineage_by_id()`, `get_taxonomicon_id()`, `taxo_search()` |
+| Retrieve or search live taxonomy | `get_lineage()`, `get_lineage_by_id()`, `lineage_ranks()`, `get_taxonomicon_id()`, `taxo_search()`, `taxonomicon_available()` |
 | Create an auditable resolution | `taxo_resolve()`, `taxo_from_lineages()` |
 | Compare hierarchy nodes | `taxo_distance()`, `mrca()`, `shared_clades()`, `taxo_path()` |
-| Build community distances | `distance_matrix()`, `cross_distances()`, `focal_distances()`, `closest_relative()` |
+| Build community distances (four metrics) | `distance_matrix()`, `cross_distances()`, `focal_distances()`, `closest_relative()` |
+| Measure taxonomic diversity | `taxo_distinctness()`, `taxo_distinctness_test()` |
 | Represent the hierarchy as a tree | `taxo_tree()` |
 | Test membership | `is_member()`, `filter_clade()` |
 | Analyze and visualize | `taxo_cluster()`, `taxo_ordinate()`, `taxo_heatmap()` |

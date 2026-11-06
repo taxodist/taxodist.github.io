@@ -63,7 +63,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./images/taxodist_sepia.png" rel="icon" type="image/png">
+<link href="./images/favicon-192.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -102,13 +102,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="taxodist -">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://rodrigosqrt3.github.io/taxodist-web/images/taxodist_sepia.png">
+<meta property="og:image" content="https://taxodist.github.io/images/taxodist_sepia.png">
 <meta property="og:site-name" content="taxodist">
 <meta property="og:image:height" content="1640">
 <meta property="og:image:width" content="1417">
 <meta name="twitter:title" content="taxodist -">
 <meta name="twitter:description" content="">
-<meta name="twitter:image" content="https://rodrigosqrt3.github.io/taxodist-web/images/taxodist_sepia.png">
+<meta name="twitter:image" content="https://taxodist.github.io/images/taxodist_sepia.png">
 <meta name="twitter:image-height" content="1640">
 <meta name="twitter:image-width" content="1417">
 <meta name="twitter:card" content="summary_large_image">
@@ -220,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="taxodist" class="level1 g-col-12 g-col-md-9">
 <h1>taxodist</h1>
 <p><strong>Taxonomic hierarchy distances and lineage analysis in R, Python, and Julia</strong></p>
-<p><code>taxodist</code> retrieves ordered taxonomic lineages, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix.</p>
+<p><code>taxodist</code> retrieves ordered taxonomic lineages and the ranks of their nodes, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix. Path-length, Wu–Palmer, and rank-based distances and the taxonomic distinctness indices of Clarke and Warwick are also available.</p>
 <p><a href="./getting-started.html">Introduction and usage</a> · <a href="./methodology.html">Methodology</a> · <a href="./reference.html">Function reference</a> · <a href="https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/">Web application</a></p>
 </section>
 <div class="g-col-12 g-col-md-3 text-center">
@@ -229,7 +229,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="release-meta">
-<p><strong>Current coordinated release: 0.9.0</strong> (R, Python, and Julia)</p>
+<p><strong>Current coordinated release: 1.0.0</strong> (R, Python, and Julia) — first stable release</p>
 <p><a href="https://cran.r-project.org/package=taxodist"><img src="https://img.shields.io/cran/v/taxodist?color=2f855a.png" class="img-fluid" alt="CRAN status"></a> <a href="https://pypi.org/project/taxodist"><img src="https://img.shields.io/pypi/v/taxodist?color=2f855a.png" class="img-fluid" alt="PyPI version"></a> <a href="https://platform.juliahub.com/ui/Packages/General/Taxodist/"><img src="https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Frodrigosqrt3%2FTaxodist.jl%2Fmain%2FProject.toml&amp;query=%24.version&amp;prefix=v&amp;label=julia&amp;color=2f855a" class="img-fluid" alt="Julia version"></a></p>
 </div>
 <section id="what-does-taxodist-measure" class="level2">
@@ -242,7 +242,7 @@ d(A,B)=
 \dfrac{1}{\operatorname{depth}(\operatorname{MRCA})}, &amp; L_A \neq L_B.
 \end{cases}
 \]</span></p>
-<p>A deeper shared ancestor produces a smaller distance. Zero is reserved for identical hierarchy nodes; distinct ancestor–descendant nodes retain a positive distance.</p>
+<p>A deeper shared ancestor produces a smaller distance. Zero is reserved for identical hierarchy nodes; distinct ancestor–descendant nodes retain a positive distance. This reciprocal distance is the default; the <code>metric</code> argument selects the path length, the Wu–Palmer distance, or a rank-based distance instead.</p>
 <div class="callout callout-style-default callout-important callout-titled" title="Classification distance, not evolutionary distance">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -258,18 +258,18 @@ Classification distance, not evolutionary distance
 </div>
 <p><a href="./methodology.html">Detailed definition and assumptions</a></p>
 </section>
-<section id="version-0.9.0" class="level2">
-<h2 class="anchored" data-anchor-id="version-0.9.0">Version 0.9.0</h2>
-<p>Version 0.9.0 is released simultaneously for R, Python, and Julia. The distance definition is unchanged; the release corrects several retrieval and caching errors and adds tools for trees, set comparisons, and repeated analyses.</p>
+<section id="version-1.0.0" class="level2">
+<h2 class="anchored" data-anchor-id="version-1.0.0">Version 1.0.0</h2>
+<p>Version 1.0.0 is the first stable release, published simultaneously for R, Python, and Julia. The default distance, the alternative metrics, and the bundle format (schema 1.1) are now stable: later 1.x releases keep their definitions and continue to read bundles written by this version.</p>
 <ul>
-<li><strong>Consistent resolution.</strong> <code>taxo_resolve()</code> now truncates each lineage exactly as <code>get_lineage()</code> does, so matrices computed from names and from their resolution record are identical.</li>
-<li><strong>Classification trees.</strong> <code>taxo_tree()</code> builds a tree directly from the lineages, with named clades as internal nodes and branch lengths whose patristic distances reproduce <code>distance_matrix()</code>.</li>
-<li><strong>Distances between two sets.</strong> <code>cross_distances()</code> returns the rectangular matrix between, for example, community members and reference taxa.</li>
-<li><strong>Comparison of analyses.</strong> <code>compare_bundles()</code> reports which taxa changed identifier, status, or lineage between two bundles, and which distances changed.</li>
-<li><strong>Name handling.</strong> Whitespace and letter case in queried names are normalized, and the new <code>within</code> argument restricts homonym candidates to a clade.</li>
-<li><strong>Robustness and speed.</strong> Requests are retried after transient failures, coverage checks report an unknown status when the server cannot be reached, and matrix construction is vectorized.</li>
+<li><strong>New lineage parser.</strong> Lineages are read from the structure of The Taxonomicon page rather than from its text, so author strings, rank labels, and markers can no longer leak into, or remove, lineage nodes. <strong>Distances can differ from earlier versions.</strong></li>
+<li><strong>Ranks.</strong> The rank of every lineage node is retrieved and cached with the lineage. <code>lineage_ranks()</code> returns each node with its rank and depth, and resolutions store the ranks.</li>
+<li><strong>Distance metrics.</strong> A <code>metric</code> argument selects <code>"reciprocal"</code> (default, unchanged), <code>"path"</code>, <code>"wu_palmer"</code>, or <code>"ranked"</code> (Clarke and Warwick’s step weights).</li>
+<li><strong>Taxonomic distinctness.</strong> <code>taxo_distinctness()</code> computes Δ, Δ*, Δ+, and Λ+ (agreeing with <code>vegan::taxondive()</code>), and <code>taxo_distinctness_test()</code> compares a sample with random draws from a species pool.</li>
+<li><strong>Bundle schema 1.1.</strong> Bundles record the metric and the lineage ranks; schema 1.0 bundles are still read.</li>
+<li><strong>Gentler on the server.</strong> Consecutive requests are spaced by at least 0.25 s, and <code>taxonomicon_available()</code> checks quickly whether the server can be reached.</li>
 </ul>
-<p>See the <a href="./news.html">changelog</a> for the complete list, including behavior changes.</p>
+<p>See the <a href="./news.html">changelog</a> for the complete list, including breaking changes.</p>
 </section>
 <section id="one-workflow-three-languages" class="level2">
 <h2 class="anchored" data-anchor-id="one-workflow-three-languages">One workflow, three languages</h2>
@@ -337,7 +337,7 @@ Classification distance, not evolutionary distance
 <tbody>
 <tr class="odd">
 <td>Retrieve or search live taxonomy</td>
-<td><code>get_lineage()</code>, <code>get_lineage_by_id()</code>, <code>get_taxonomicon_id()</code>, <code>taxo_search()</code></td>
+<td><code>get_lineage()</code>, <code>get_lineage_by_id()</code>, <code>lineage_ranks()</code>, <code>get_taxonomicon_id()</code>, <code>taxo_search()</code>, <code>taxonomicon_available()</code></td>
 </tr>
 <tr class="even">
 <td>Create an auditable resolution</td>
@@ -348,26 +348,30 @@ Classification distance, not evolutionary distance
 <td><code>taxo_distance()</code>, <code>mrca()</code>, <code>shared_clades()</code>, <code>taxo_path()</code></td>
 </tr>
 <tr class="even">
-<td>Build community distances</td>
+<td>Build community distances (four metrics)</td>
 <td><code>distance_matrix()</code>, <code>cross_distances()</code>, <code>focal_distances()</code>, <code>closest_relative()</code></td>
 </tr>
 <tr class="odd">
+<td>Measure taxonomic diversity</td>
+<td><code>taxo_distinctness()</code>, <code>taxo_distinctness_test()</code></td>
+</tr>
+<tr class="even">
 <td>Represent the hierarchy as a tree</td>
 <td><code>taxo_tree()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Test membership</td>
 <td><code>is_member()</code>, <code>filter_clade()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Analyze and visualize</td>
 <td><code>taxo_cluster()</code>, <code>taxo_ordinate()</code>, <code>taxo_heatmap()</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Preserve and compare analyses</td>
 <td><code>taxo_bundle()</code>, <code>write_taxodist_bundle()</code>, <code>read_taxodist_bundle()</code>, <code>compare_bundles()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Work reproducibly offline</td>
 <td><code>taxo_from_lineages()</code>, <code>load_taxobase()</code></td>
 </tr>
@@ -771,7 +775,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">taxodist 0.9.0</div>   
+    <div class="nav-footer-left">taxodist 1.0.0</div>   
     <div class="nav-footer-center">
       &nbsp;
     </div>

@@ -1,1 +1,1 @@
-Sitemap: https://rodrigosqrt3.github.io/taxodist-web/sitemap.xml
+Sitemap: https://taxodist.github.io/sitemap.xml

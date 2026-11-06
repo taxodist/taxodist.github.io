@@ -29,7 +29,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./images/taxodist_sepia.png" rel="icon" type="image/png">
+<link href="./images/favicon-192.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -67,10 +67,10 @@ ul.task-list li input[type="checkbox"] {
 
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="taxodist - Changelog">
-<meta property="og:description" content="Release history for taxodist, from version 0.1.0 through the coordinated 0.9.0 implementations.">
+<meta property="og:description" content="Release history for taxodist, from version 0.1.0 through the first stable release, 1.0.0.">
 <meta property="og:site-name" content="taxodist">
 <meta name="twitter:title" content="taxodist - Changelog">
-<meta name="twitter:description" content="Release history for taxodist, from version 0.1.0 through the coordinated 0.9.0 implementations.">
+<meta name="twitter:description" content="Release history for taxodist, from version 0.1.0 through the first stable release, 1.0.0.">
 <meta name="twitter:card" content="summary">
 </head>
 
@@ -215,13 +215,21 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#portable-analysis-bundles" id="toc-portable-analysis-bundles" class="nav-link" data-scroll-target="#portable-analysis-bundles">Portable analysis bundles</a></li>
   <li><a href="#robustness-and-compatibility" id="toc-robustness-and-compatibility" class="nav-link" data-scroll-target="#robustness-and-compatibility">Robustness and compatibility</a></li>
   </ul></li>
-  <li><a href="#taxodist-0.9.0-latest" id="toc-taxodist-0.9.0-latest" class="nav-link" data-scroll-target="#taxodist-0.9.0-latest">taxodist 0.9.0 <span class="badge bg-primary">Latest</span></a>
+  <li><a href="#taxodist-0.9.0" id="toc-taxodist-0.9.0" class="nav-link" data-scroll-target="#taxodist-0.9.0">taxodist 0.9.0</a>
   <ul class="collapse">
   <li><a href="#corrections-2" id="toc-corrections-2" class="nav-link" data-scroll-target="#corrections-2">Corrections</a></li>
   <li><a href="#behavior-changes" id="toc-behavior-changes" class="nav-link" data-scroll-target="#behavior-changes">Behavior changes</a></li>
   <li><a href="#new-functions-and-arguments" id="toc-new-functions-and-arguments" class="nav-link" data-scroll-target="#new-functions-and-arguments">New functions and arguments</a></li>
   <li><a href="#performance-and-network-handling" id="toc-performance-and-network-handling" class="nav-link" data-scroll-target="#performance-and-network-handling">Performance and network handling</a></li>
   <li><a href="#web-application" id="toc-web-application" class="nav-link" data-scroll-target="#web-application">Web application</a></li>
+  </ul></li>
+  <li><a href="#taxodist-1.0.0-latest" id="toc-taxodist-1.0.0-latest" class="nav-link" data-scroll-target="#taxodist-1.0.0-latest">taxodist 1.0.0 <span class="badge bg-primary">Latest</span></a>
+  <ul class="collapse">
+  <li><a href="#new-features" id="toc-new-features" class="nav-link" data-scroll-target="#new-features">New features</a></li>
+  <li><a href="#breaking-changes-lineage-parsing" id="toc-breaking-changes-lineage-parsing" class="nav-link" data-scroll-target="#breaking-changes-lineage-parsing">Breaking changes: lineage parsing</a></li>
+  <li><a href="#corrections-3" id="toc-corrections-3" class="nav-link" data-scroll-target="#corrections-3">Corrections</a></li>
+  <li><a href="#network" id="toc-network" class="nav-link" data-scroll-target="#network">Network</a></li>
+  <li><a href="#packaging" id="toc-packaging" class="nav-link" data-scroll-target="#packaging">Packaging</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -232,7 +240,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Changelog</h1>
-<p class="subtitle lead">Release history for taxodist, from version 0.1.0 through the coordinated 0.9.0 implementations.</p>
+<p class="subtitle lead">Release history for taxodist, from version 0.1.0 through the first stable release, 1.0.0.</p>
 </div>
 
 
@@ -449,8 +457,8 @@ Behavioral change
 </ul>
 </section>
 </section>
-<section id="taxodist-0.9.0-latest" class="level2">
-<h2 class="anchored" data-anchor-id="taxodist-0.9.0-latest">taxodist 0.9.0 <span class="badge bg-primary">Latest</span></h2>
+<section id="taxodist-0.9.0" class="level2">
+<h2 class="anchored" data-anchor-id="taxodist-0.9.0">taxodist 0.9.0</h2>
 <p>Version 0.9.0 was released simultaneously for R, Python, and Julia. The distance definition and the bundle schema (version 1.0) are unchanged; bundles written by any of the three implementations are read by the other two without differences.</p>
 <section id="corrections-2" class="level3">
 <h3 class="anchored" data-anchor-id="corrections-2">Corrections</h3>
@@ -506,6 +514,74 @@ Changed return values
 <ul>
 <li>The application uses the 0.9.0 packages, adds a between-groups tab and classification trees, reports names that were not found and the entry chosen for ambiguous names, offers CSV, PNG, Newick, and bundle downloads, and supports links that reopen a query.</li>
 <li>Its bundled lineage cache was rebuilt; a cache produced by an earlier parser is no longer loaded.</li>
+</ul>
+</section>
+</section>
+<section id="taxodist-1.0.0-latest" class="level2">
+<h2 class="anchored" data-anchor-id="taxodist-1.0.0-latest">taxodist 1.0.0 <span class="badge bg-primary">Latest</span></h2>
+<p>First stable release, published simultaneously for R, Python, and Julia. The default distance metric, the other metrics, and the bundle format (schema 1.1) are now stable: later 1.x releases will keep their definitions and continue to read bundles written by this version.</p>
+<section id="new-features" class="level3">
+<h3 class="anchored" data-anchor-id="new-features">New features</h3>
+<ul>
+<li><strong>Ranks.</strong> The rank of every lineage node (for example <code>"Kingdom"</code>, <code>"Clade"</code>, <code>"Superfamily"</code>, or <code>"Genus"</code>) is read from The Taxonomicon and cached with the lineage. The new <code>lineage_ranks()</code> returns each node with its rank and depth. <code>taxo_resolve()</code> results gain a <code>ranks</code> column, and <code>taxo_from_lineages()</code> accepts user-supplied ranks through a new <code>ranks</code> argument.</li>
+<li><strong>Distance metrics.</strong> <code>taxo_distance()</code>, <code>distance_matrix()</code>, <code>cross_distances()</code>, <code>closest_relative()</code>, <code>focal_distances()</code>, <code>taxo_heatmap()</code>, and <code>taxo_bundle()</code> gain a <code>metric</code> argument, which <code>taxo_cluster()</code> and <code>taxo_ordinate()</code> pass on to <code>distance_matrix()</code>:
+<ul>
+<li><code>"reciprocal"</code> (default): <span class="math inline">\(1/\operatorname{depth}(\operatorname{MRCA})\)</span>, unchanged;</li>
+<li><code>"path"</code>: the number of edges between the two nodes in the classification tree;</li>
+<li><code>"wu_palmer"</code>: <span class="math inline">\(1 - 2\operatorname{depth}(\operatorname{MRCA}) / (\operatorname{depth}(A) + \operatorname{depth}(B))\)</span>, which normalizes for the uneven resolution of different parts of the classification;</li>
+<li><code>"ranked"</code>: half the path length through the standard Linnaean ranks only (kingdom to species, configurable), i.e.&nbsp;the step weights of Clarke and Warwick.</li>
+</ul>
+Distance matrices record the metric used (the <code>"method"</code> attribute of the R <code>dist</code>, <code>attrs["metric"]</code> in Python, and the <code>metric</code> field in Julia), and <code>taxo_distance()</code> results gain a <code>metric</code> element.</li>
+<li><strong>Taxonomic distinctness.</strong> <code>taxo_distinctness()</code> computes Warwick and Clarke’s taxonomic diversity (Δ), distinctness (Δ*), average taxonomic distinctness (Δ+), and its variation (Λ+) for one or more samples, from presence or abundance data. Results agree with <code>vegan::taxondive()</code>. <code>taxo_distinctness_test()</code> compares Δ+ and Λ+ of a sample with random samples of the same size from a master list.</li>
+<li><code>taxonomicon_available()</code> reports whether The Taxonomicon can be reached, with a short timeout. R examples that need the server now run only when it answers, so checking the package no longer waits on network timeouts.</li>
+<li><strong>Bundle schema 1.1.</strong> Bundles record the metric used (and, for <code>"ranked"</code>, its rank levels) and the lineage ranks. Distances are verified with the stored metric. Schema 1.0 bundles are still read and must use the reciprocal metric.</li>
+</ul>
+</section>
+<section id="breaking-changes-lineage-parsing" class="level3">
+<h3 class="anchored" data-anchor-id="breaking-changes-lineage-parsing">Breaking changes: lineage parsing</h3>
+<div class="callout callout-style-default callout-important callout-titled" title="Distances can differ from earlier versions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Distances can differ from earlier versions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Lineages are now read from the structure of The Taxonomicon page instead of its text. Each node’s name is taken from the page’s own markup for the scientific name, so author strings, rank labels, extinction and type markers, and vernacular names can no longer leak into, or remove, nodes. Previously about 16% of lineages contained malformed nodes such as <code>"Passeres (C."</code>, <code>"Delphinida de"</code>, or <code>"Alismatales R.Br. ex"</code>; because these contained spaces, name-based queries silently dropped them, so lineage depths, and therefore distances, differed from the classification and from ID-based queries. Some clades were also lost entirely (for example <code>Terrestrornithes</code>, <code>Dendrornithes</code>, and <code>Anomalogonates</code> in passerine birds), taxa whose page row is labelled <code>[plesion]</code> or <code>Anamorph genus</code> were recorded under that label, and the <code>‡</code> marker was not removed. Analyses computed with earlier versions should be recomputed.</p>
+</div>
+</div>
+<ul>
+<li>Species are now recorded as nodes of their subspecies, and subgenera as nodes of their species, when they appear in the lineage. Previously <code>"Subspecies Homo sapiens sapiens"</code> was parsed as <code>"Subspecies"</code> and the species node was dropped.</li>
+<li>Pages without the structured hierarchy block are still parsed from text, now by extracting the scientific name at the start of each line rather than by deleting author strings. This handles lower-case particles (<code>de</code>, <code>van der</code>, <code>d'</code>), non-ASCII initials (<code>Özdikmen</code>), and abbreviations (<code>R.Br. ex</code>).</li>
+<li>The parser is identical in the three implementations and is checked against the same trimmed copies of real Taxonomicon pages and their expected lineages.</li>
+<li>The <code>taxobase</code> reference dataset was rebuilt with the new parser.</li>
+</ul>
+</section>
+<section id="corrections-3" class="level3">
+<h3 class="anchored" data-anchor-id="corrections-3">Corrections</h3>
+<ul>
+<li>Taxon names containing regular-expression metacharacters, notably parentheses in subgenus names such as <code>"Microtus (Agricola)"</code>, are matched literally. Whole-word matching no longer fails next to punctuation and recognizes non-ASCII letters.</li>
+<li><code>taxo_resolve()</code> reports a name whose candidates were all retrieved but are not biological (for example astronomical objects) as <code>"unresolved"</code> instead of <code>"retrieval_error"</code>.</li>
+<li>When a name has several biological entries, entries marked as invalid, rejected, nude, or illegitimate names (<code>nom. inval.</code>, <code>nom. rej.</code>, <code>nom. nud.</code>, <code>nom. illeg.</code>) are considered only after the others. Previously <code>"Amanita"</code> resolved to an invalid name instead of the conserved genus.</li>
+<li><code>load_cache()</code> discards lineages from cache files written by earlier versions, whose parser could produce malformed nodes, and keeps their taxon IDs. <code>save_cache()</code> records the parser version in the file.</li>
+<li>Python: resolutions are no longer mistaken for distance matrices by <code>taxo_cluster()</code> and <code>taxo_ordinate()</code>; returned lineages are copies, so modifying them no longer corrupts the cache; a single string passed where several taxa are expected is treated as one taxon; integral numbers are treated as Taxonomicon IDs.</li>
+<li>Julia: the 30-second HTTP timeout is applied again; numeric taxa no longer cause errors in the pairwise and focal functions; <code>taxo_from_lineages()</code> keeps the order of a vector of <code>label =&gt; lineage</code> pairs (a plain <code>Dict</code> is sorted by label); the session cache is safe to use from several tasks or threads.</li>
+</ul>
+</section>
+<section id="network" class="level3">
+<h3 class="anchored" data-anchor-id="network">Network</h3>
+<ul>
+<li>Consecutive requests to The Taxonomicon are spaced by at least 0.25 seconds, so large batches do not overload the server. The interval is set with <code>options(taxodist.min_interval = ...)</code> in R, <code>taxodist.fetch.MIN_INTERVAL</code> in Python, and <code>Taxodist.MIN_INTERVAL[]</code> in Julia; 0 disables it.</li>
+</ul>
+</section>
+<section id="packaging" class="level3">
+<h3 class="anchored" data-anchor-id="packaging">Packaging</h3>
+<ul>
+<li>R: xml2 moved from Suggests to Imports.</li>
+<li>Python: matplotlib and seaborn are now optional and installed with <code>pip install "taxodist[plot]"</code>; Python 3.8 is no longer supported. The bundle JSON schema is included in the package.</li>
+<li>Julia: Plots.jl is now a weak dependency loaded through a package extension, so <code>using Taxodist</code> no longer loads Plots; run <code>using Plots</code> to enable plotting.</li>
 </ul>
 
 
@@ -864,7 +940,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">taxodist 0.9.0</div>   
+    <div class="nav-footer-left">taxodist 1.0.0</div>   
     <div class="nav-footer-center">
       &nbsp;
     </div>

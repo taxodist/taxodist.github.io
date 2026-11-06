@@ -63,7 +63,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./images/taxodist_sepia.png" rel="icon" type="image/png">
+<link href="./images/favicon-192.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -248,14 +248,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="methodological-position" class="level2">
 <h2 class="anchored" data-anchor-id="methodological-position">Methodological position</h2>
-<p>The distance between distinct hierarchy nodes is the reciprocal of MRCA depth. Identical complete lineages receive distance zero. Within a connected hierarchy, this produces an ultrametric.</p>
+<p>By default, the distance between distinct hierarchy nodes is the reciprocal of MRCA depth. Identical complete lineages receive distance zero. Within a connected hierarchy, this produces an ultrametric. Path-length, Wu–Palmer, and rank-based distances are available as explicit alternatives.</p>
 <p>These values measure classification depth. They do not estimate evolutionary time, genetic or morphological divergence, phylogenetic branch length, or statistical support for ancestry. The interpretation of every analysis is conditional on the source classification and the intermediate nodes it records.</p>
-<p>Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 adds auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations.</p>
+<p>Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 added auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations. Version 0.9.0 corrected retrieval and caching errors and added classification trees, distances between two sets of taxa, and the comparison of repeated analyses. Version 1.0.0, the first stable release, replaced the text-based lineage parser with one that reads the structure of each Taxonomicon page, retained the rank of every node, added alternative distance metrics and the taxonomic distinctness indices of Clarke and Warwick, and froze the metric definitions and the bundle format for the 1.x series.</p>
 </section>
 <section id="project-history" class="level2">
 <h2 class="anchored" data-anchor-id="project-history">Project history</h2>
 <p>The project began with a general question: how can the shared hierarchical position of any two named organisms be retrieved and compared programmatically?</p>
-<p>Early development focused on resolving names and parsing the deeply nested classification exposed by The Taxonomicon. Subsequent releases added matrix operations, lineage comparison, cache persistence, visualization, multivariate helpers, offline reference data, and Python and Julia implementations with matching distance semantics.</p>
+<p>Early development focused on resolving names and parsing the deeply nested classification exposed by The Taxonomicon. Subsequent releases added matrix operations, lineage comparison, cache persistence, visualization, multivariate helpers, offline reference data, Python and Julia implementations with matching distance semantics, and diversity indices.</p>
 <p>The project remains deliberately focused on classification-based analysis. It does not attempt to replace curated phylogenies, sequence-based inference, divergence-time estimation, or specialized taxonomic name services.</p>
 </section>
 <section id="reproducibility-and-transparency" class="level2">
@@ -267,7 +267,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>numeric Taxonomicon IDs, particularly for homonyms;</li>
 <li>unresolved or excluded taxa;</li>
 <li>whether live data or the packaged <code>taxobase</code> reference object was used;</li>
-<li>the distance definition and downstream analysis settings.</li>
+<li>the distance metric and downstream analysis settings.</li>
 </ul>
 <p>The fixed <code>taxobase</code> object is distributed for examples, tests, and comparisons that must not depend on current server availability. It should not be assumed to represent the latest live classification.</p>
 </section>
@@ -275,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="citation">Citation</h2>
 <p>The R, Python, and Julia implementations are parts of the same software project and may be cited with a common project-level reference:</p>
 <blockquote class="blockquote">
-<p>Villa, R. F. (2026). <em>taxodist: Taxonomic Hierarchy Distances and Lineage Analysis</em> (version 0.8.0). Open-source software. <a href="https://rodrigosqrt3.github.io/taxodist-web/" class="uri">https://rodrigosqrt3.github.io/taxodist-web/</a>.</p>
+<p>Villa, R. F. (2026). <em>taxodist: Taxonomic Hierarchy Distances and Lineage Analysis</em> (version 1.0.0). Open-source software. <a href="https://taxodist.github.io/" class="uri">https://taxodist.github.io/</a>.</p>
 </blockquote>
 <p>In the methods section, identify the implementation used:</p>
 <ul>
@@ -667,7 +667,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">taxodist 0.8.0</div>   
+    <div class="nav-footer-left">taxodist 1.0.0</div>   
     <div class="nav-footer-center">
       &nbsp;
     </div>

@@ -13,17 +13,17 @@ The current implementation uses lineage data from [The Taxonomicon](http://taxon
 
 ## Methodological position
 
-The distance between distinct hierarchy nodes is the reciprocal of MRCA depth. Identical complete lineages receive distance zero. Within a connected hierarchy, this produces an ultrametric.
+By default, the distance between distinct hierarchy nodes is the reciprocal of MRCA depth. Identical complete lineages receive distance zero. Within a connected hierarchy, this produces an ultrametric. Path-length, Wu–Palmer, and rank-based distances are available as explicit alternatives.
 
 These values measure classification depth. They do not estimate evolutionary time, genetic or morphological divergence, phylogenetic branch length, or statistical support for ancestry. The interpretation of every analysis is conditional on the source classification and the intermediate nodes it records.
 
-Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 added auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations. Version 0.9.0 corrected retrieval and caching errors and added classification trees, distances between two sets of taxa, and the comparison of repeated analyses.
+Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 added auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations. Version 0.9.0 corrected retrieval and caching errors and added classification trees, distances between two sets of taxa, and the comparison of repeated analyses. Version 1.0.0, the first stable release, replaced the text-based lineage parser with one that reads the structure of each Taxonomicon page, retained the rank of every node, added alternative distance metrics and the taxonomic distinctness indices of Clarke and Warwick, and froze the metric definitions and the bundle format for the 1.x series.
 
 ## Project history
 
 The project began with a general question: how can the shared hierarchical position of any two named organisms be retrieved and compared programmatically?
 
-Early development focused on resolving names and parsing the deeply nested classification exposed by The Taxonomicon. Subsequent releases added matrix operations, lineage comparison, cache persistence, visualization, multivariate helpers, offline reference data, and Python and Julia implementations with matching distance semantics.
+Early development focused on resolving names and parsing the deeply nested classification exposed by The Taxonomicon. Subsequent releases added matrix operations, lineage comparison, cache persistence, visualization, multivariate helpers, offline reference data, Python and Julia implementations with matching distance semantics, and diversity indices.
 
 The project remains deliberately focused on classification-based analysis. It does not attempt to replace curated phylogenies, sequence-based inference, divergence-time estimation, or specialized taxonomic name services.
 
@@ -36,7 +36,7 @@ Live taxonomic databases change. Analyses using retrieved lineages should theref
 - numeric Taxonomicon IDs, particularly for homonyms;
 - unresolved or excluded taxa;
 - whether live data or the packaged `taxobase` reference object was used;
-- the distance definition and downstream analysis settings.
+- the distance metric and downstream analysis settings.
 
 The fixed `taxobase` object is distributed for examples, tests, and comparisons that must not depend on current server availability. It should not be assumed to represent the latest live classification.
 
@@ -44,7 +44,7 @@ The fixed `taxobase` object is distributed for examples, tests, and comparisons 
 
 The R, Python, and Julia implementations are parts of the same software project and may be cited with a common project-level reference:
 
-> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version 0.9.0). Open-source software. <https://taxodist.github.io/>.
+> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version 1.0.0). Open-source software. <https://taxodist.github.io/>.
 
 In the methods section, identify the implementation used:
 

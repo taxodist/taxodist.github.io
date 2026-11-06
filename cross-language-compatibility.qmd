@@ -5,12 +5,14 @@ subtitle: "Shared semantics, native return types, and reproducible workflows in 
 
 ## Compatibility contract
 
-The R, Python, and Julia packages are separate implementations of the same taxonomic hierarchy distance. Version 0.9.0 is released simultaneously in all three, and their shared behavioral contract states that:
+The R, Python, and Julia packages are separate implementations of the same taxonomic hierarchy distance. Version 1.0.0, the first stable release, is published simultaneously in all three, and their shared behavioral contract states that:
 
+- lineages and node ranks are read by the same structured parser, checked against the same trimmed copies of real Taxonomicon pages and their expected lineages;
 - ordered lineages are compared through their continuous common prefix;
 - identical complete lineages receive distance zero;
-- distinct nodes receive $1 / \operatorname{depth}(\operatorname{MRCA})$;
-- valid Taxonomicon nodes have distances in $(0,1]$, while disconnected inputs retain infinite distance as a defensive result;
+- by default, distinct nodes receive $1 / \operatorname{depth}(\operatorname{MRCA})$;
+- the alternative metrics `"path"`, `"wu_palmer"`, and `"ranked"` have the same definitions and default rank levels;
+- valid Taxonomicon nodes have reciprocal distances in $(0,1]$, while disconnected inputs retain infinite distance as a defensive result;
 - unresolved lineages produce missing values in multi-taxon results;
 - ancestor–descendant pairs retain positive distance;
 - clade membership uses exact, case-insensitive matching;
@@ -18,8 +20,9 @@ The R, Python, and Julia packages are separate implementations of the same taxon
 - resolution audits use the same fields and status vocabulary;
 - resolution records and name-based retrieval truncate lineages by the same rule, after the same whitespace normalization and case-insensitive location of the queried name;
 - coverage checks distinguish found, absent, and unknown (server unreachable);
-- portable bundles use the same schema version 1.0 and matrix encoding;
-- classification trees use the same topology rules and branch lengths, so their patristic distances equal the distance matrix in every implementation.
+- portable bundles use the same schema version 1.1 and matrix encoding, and all three still read schema 1.0;
+- classification trees use the same topology rules and branch lengths, so their patristic distances equal the distance matrix in every implementation;
+- taxonomic diversity and distinctness indices are computed from the same formulas and agree with `vegan::taxondive()`.
 
 Compatibility means equivalent scientific semantics and labeled results. It does not mean that every object has the same internal representation or printed appearance.
 
@@ -101,6 +104,8 @@ For lineages retrieved from the same Taxonomicon record and processed under the 
 | Resolve a name | `get_taxonomicon_id()` |
 | Search candidates | `taxo_search()` |
 | Retrieve a lineage | `get_lineage()`, `get_lineage_by_id()` |
+| Retrieve node ranks | `lineage_ranks()` |
+| Check that the server answers | `taxonomicon_available()` |
 | Audit a batch resolution | `taxo_resolve()` |
 | Supply offline lineages | `taxo_from_lineages()` |
 | Compare two nodes | `taxo_distance()`, `mrca()` |
@@ -111,22 +116,38 @@ For lineages retrieved from the same Taxonomicon record and processed under the 
 | Test membership | `is_member()`, `filter_clade()` |
 | Check availability | `check_coverage()`, `lineage_depth()` |
 | Analyze a matrix | `taxo_cluster()`, `taxo_ordinate()`, `taxo_heatmap()` |
+| Taxonomic diversity and distinctness | `taxo_distinctness()`, `taxo_distinctness_test()` |
 | Manage the cache | `cache_info()`, `save_cache()`, `load_cache()`, `clear_cache()` |
 | Preserve or exchange an analysis | `taxo_bundle()`, `write_taxodist_bundle()`, `read_taxodist_bundle()` |
 | Compare two analyses | `compare_bundles()` |
 | Load reference data | R: `data(taxobase)`; Python and Julia: `load_taxobase()` |
 
-Argument names and defaults are matched where language conventions permit. All three implementations support `verbose`; progress reporting is available for matrix operations, with minor interface differences documented in the API reference.
+Argument names and defaults are matched where language conventions permit. All three implementations support `verbose` and the same `metric` values; progress reporting is available for matrix operations, with minor interface differences documented in the API reference.
+
+### Settings
+
+| Setting | R | Python | Julia |
+|---|---|---|---|
+| Attempts per request (default 3) | `options(taxodist.max_tries = n)` | `taxodist.fetch.MAX_TRIES` | `Taxodist.MAX_TRIES[]` |
+| Interval between requests (default 0.25 s) | `options(taxodist.min_interval = s)` | `taxodist.fetch.MIN_INTERVAL` | `Taxodist.MIN_INTERVAL[]` |
+| Rank levels of `"ranked"` | `options(taxodist.rank_levels = ...)` | `taxodist.distance.RANK_LEVELS` | `Taxodist.RANK_LEVELS[]` |
+| Random numbers in `taxo_distinctness_test()` | `set.seed()` | `seed=` argument | `rng=` argument |
+| Plotting | Base graphics | `pip install "taxodist[plot]"` (matplotlib, seaborn) | `using Plots` (package extension) |
+
+Random draws are not identical between languages, so the simulated limits and $p$-values of `taxo_distinctness_test()` differ slightly; the observed and expected $\Delta^+$ do not.
 
 ## Native object differences
 
 | Result | R | Python | Julia |
 |---|---|---|---|
 | Lineage | Character vector | List of strings | `Vector{String}` |
+| Lineage ranks | Data frame (`NA` if unranked) | `pandas.DataFrame` (`None` if unranked) | `DataFrame` (`missing` if unranked) |
 | Pairwise distance | S3 list, class `taxodist_result` | Dictionary | Named tuple |
 | Resolution audit | `taxodist_resolution` data frame | `TaxodistResolution` | `TaxodistResolution` with a `DataFrame` |
 | Portable bundle | `taxodist_bundle` list | `TaxodistBundle` | `TaxodistBundle` |
-| Distance matrix | Base R `dist` | Labeled `pandas.DataFrame` | `TaxonomicDistanceMatrix` |
+| Distance matrix | Base R `dist` (metric in attribute `"method"`) | Labeled `pandas.DataFrame` (metric in `attrs["metric"]`) | `TaxonomicDistanceMatrix` (metric in field `metric`) |
+| Distinctness indices | `taxodist_distinctness` data frame | `pandas.DataFrame` | Named tuple `(metric, data)` |
+| Distinctness test | `taxodist_distinctness_test` list | `TaxodistDistinctnessTest` | Named tuple |
 | Distances between two sets | Numeric matrix with dimnames | Labeled `pandas.DataFrame` | `TaxonomicCrossDistances` |
 | Classification tree | `ape`-compatible `phylo` | `TaxodistTree` | `TaxodistTree` |
 | Bundle comparison | `taxodist_bundle_comparison` list | `TaxodistBundleComparison` | `TaxodistBundleComparison` |
@@ -152,7 +173,7 @@ All three implementations assign the same four resolution statuses:
 | `unresolved` | Search completed but produced no valid candidate |
 | `retrieval_error` | Search, lineage retrieval, or response parsing failed |
 
-Resolution rows share the fields `input`, `resolved_name`, `id`, `status`, `n_candidates`, `lineage_depth`, `lineage`, and `candidates`. `distance_matrix()` consumes these objects directly and reuses stored lineages without new requests.
+Resolution rows share the fields `input`, `resolved_name`, `id`, `status`, `n_candidates`, `lineage_depth`, `lineage`, `ranks`, and `candidates`. `distance_matrix()` consumes these objects directly and reuses stored lineages without new requests.
 
 ::: {.panel-tabset}
 
@@ -189,9 +210,11 @@ Bundles (introduced in version 0.8.0) are a neutral JSON record for transferring
 - schema and creation timestamps;
 - source name, URL, and retrieval timestamp;
 - software name, version, and language;
-- metric definition and root-depth convention;
-- complete resolution records and candidate decisions;
+- metric name and definition, root-depth convention, and, for `"ranked"`, the rank levels;
+- complete resolution records, candidate decisions, and lineage ranks;
 - labeled distance matrix values.
+
+The current schema is version 1.1; version 1.0 bundles (written by 0.8.0 and 0.9.0) are still read and must use the reciprocal metric.
 
 The shared encoding uses JSON `null` for missing distances and the strings `"Infinity"` and `"-Infinity"` for disconnected infinities. Each reader validates imported data before constructing native objects.
 
@@ -210,6 +233,7 @@ All three implementations return the same named information from `taxo_distance(
 | `depth_b` | Complete depth of lineage B |
 | `taxon_a` | First input label |
 | `taxon_b` | Second input label |
+| `metric` | Metric used |
 
 R uses `$`, Python uses dictionary indexing, and Julia uses property access:
 
@@ -270,7 +294,7 @@ When validating ordinations across languages, compare eigenvalues and Euclidean 
 
 ## Plotting and console output
 
-R uses S3 methods such as `print()`, `plot()`, and `summary()`. Python and Julia expose explicit helpers such as `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()`.
+R uses S3 methods such as `print()`, `plot()`, and `summary()`. Python and Julia expose explicit helpers such as `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()`. Plotting is optional in both: Python needs `pip install "taxodist[plot]"`, and Julia loads its plotting code only after `using Plots`.
 
 Typography, plotting backends, colors, dendrogram orientation, and console formatting are not part of the cross-language compatibility contract. Scientific values, labels, and structural fields are.
 
@@ -375,6 +399,14 @@ from_julia = load_taxobase().statistical_matrix
 
 This checks labels, order, and numerical values without depending on language-specific serialization.
 
+## Version 1.0.0 validation
+
+- **Parser.** The three implementations share trimmed copies of real Taxonomicon pages and a file of expected lineages, and each test suite checks its structured parser against them. The text fallback parser of Julia is also checked against output generated with R.
+- **Metrics and bundles.** Distances under the four metrics, and bundles of schema 1.1, are checked against the R implementation; bundles written by Python are read by R and vice versa for every metric.
+- **Distinctness.** `taxo_distinctness()` reproduces `vegan::taxondive()` in R, and the Python and Julia implementations return the same values as R.
+- **Reference data.** `taxobase` was rebuilt in R with the new parser and exported to the neutral JSON file loaded by Python and Julia.
+- **Coverage.** Each implementation reports complete line coverage under its language-specific coverage measure.
+
 ## Version 0.9.0 validation and performance
 
 ### Bundle interoperability
@@ -416,7 +448,7 @@ Cache contents have the same conceptual keys—resolved IDs and lineages—but t
 
 Do not rename one format to imitate another. For a cross-language archival record, use the portable bundle format introduced in version 0.8.0.
 
-In all three implementations, cleaned and uncleaned lineages are cached under separate keys (`lin_<id>` and `rawlin_<id>`), and `save_cache()` and `load_cache()` default to a persistent per-user location when no file is given.
+In all three implementations, cleaned and uncleaned lineages are cached under separate keys (`lin_<id>` and `rawlin_<id>`), as are their ranks (`ranks_<id>` and `rawranks_<id>`), and `save_cache()` and `load_cache()` default to a persistent per-user location when no file is given. Cache files record the parser version (`meta_parser_version`); lineages from files written before version 1.0.0 are discarded on loading, and their taxon identifiers are kept.
 
 ::: {.callout-warning title="Untrusted Python cache files"}
 Only load `.pkl` files from trusted sources. Python's pickle format can execute code during deserialization.

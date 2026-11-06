@@ -30,7 +30,7 @@ stopifnot(
 taxobase$metadata
 ```
 
-The reference set contains 15 mammalian genera representing marsupials and several placental lineages. Its role is methodological: it provides a stable matrix with which to demonstrate downstream analyses.
+The reference set contains 15 Brazilian mammalian genera: one marsupial and representatives of several placental lineages. The matrix uses the default reciprocal distance. Its role is methodological: it provides a stable matrix with which to demonstrate downstream analyses.
 
 For an empirical study, create the matrix from the taxa observed in the study and record the package version, resolved Taxonomicon IDs, retrieval date, and any exclusions.
 
@@ -68,7 +68,7 @@ The filename and accompanying metadata should retain the distinction between cla
 
 ### Tree built directly from the lineages
 
-When the lineages themselves are available, `taxo_tree()` (version 0.9.0) builds the tree from the classification without a clustering step. Internal nodes carry clade names, polytomies are retained, and patristic distances equal the taxonomic distances exactly. The fixed `taxobase` object stores matrices rather than lineages, so this example retrieves live lineages:
+When the lineages themselves are available, `taxo_tree()` builds the tree from the classification without a clustering step. Internal nodes carry clade names, polytomies are retained, and patristic distances equal the taxonomic distances exactly. The fixed `taxobase` object stores matrices rather than lineages, so this example retrieves live lineages:
 
 ```r
 library(ape)
@@ -110,11 +110,9 @@ Negative eigenvalues indicate that the dissimilarities are not represented exact
 
 ## Taxonomic diversity and distinctness
 
-`vegan::taxondive()` accepts a community matrix and a species-level dissimilarity object. The column names of the community matrix must correspond to the labels of the distance object.
+`taxo_distinctness()` computes the indices of Clarke and Warwick directly, for one or more samples given as a community matrix (one row per sample, one column per taxon) or as a vector of names. The column names of the community matrix must correspond to the labels of the distance object. The same values are returned by `vegan::taxondive()`.
 
 ```r
-library(vegan)
-
 comm <- matrix(
   c(
     1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -129,12 +127,15 @@ comm <- matrix(
   )
 )
 
+taxo_distinctness(comm, mat)
+
+# The same indices with vegan
+library(vegan)
 diversity <- vegan::taxondive(comm, mat, match.force = TRUE)
-diversity
 summary(diversity)
 ```
 
-The principal quantities reported by `taxondive()` are:
+The principal quantities are:
 
 - **Delta** ($\Delta$): taxonomic diversity, incorporating abundance and distances between pairs of taxa;
 - **Delta\*** ($\Delta^*$): taxonomic distinctness, standardized by the abundance products for pairs of different taxa;
@@ -143,8 +144,34 @@ The principal quantities reported by `taxondive()` are:
 - **S Delta+**: species richness multiplied by $\Delta^+$.
 
 ::: {.callout-note title="Distance scaling matters"}
-The absolute values of these indices depend on the supplied dissimilarities. Traditional applications often use step distances derived from a rank table. Supplying `taxodist` values instead answers a different, explicit question based on reciprocal MRCA depth. Comparisons should therefore use the same source, cleaning rules, and distance definition throughout.
+The absolute values of these indices depend on the supplied dissimilarities. Traditional applications use step distances between Linnaean rank levels; `metric = "ranked"` reproduces these step weights (1 for congeneric species, 2 for confamilial species, and so on), and it is the default of `taxo_distinctness()` when no matrix is supplied. Supplying reciprocal MRCA-depth distances, as in the fixed matrix above, answers a different, explicit question that uses the full resolution of the classification. Comparisons should therefore use the same source, parser version, and metric throughout.
 :::
+
+With live lineages, the classical step-weight indices are obtained from the `"ranked"` metric, either by computing the matrix explicitly or by letting `taxo_distinctness()` compute it from the column names of `comm`:
+
+```r
+ranked <- distance_matrix(taxa_brazil, metric = "ranked", progress = FALSE)
+taxo_distinctness(comm, ranked)
+
+taxo_distinctness(comm, progress = FALSE)   # same result; metric = "ranked" by default
+```
+
+### Testing against a species pool
+
+$\Delta^+$ and $\Lambda^+$ have expected values that do not depend on the number of taxa, so a sample can be compared with random samples of the same size drawn from a master list. Here the 15 genera act as the pool:
+
+```r
+set.seed(42)
+test <- taxo_distinctness_test(
+  c("Panthera", "Puma", "Chrysocyon", "Pteronura", "Tapirus"),
+  mat,
+  n_iter = 999
+)
+test
+test$statistics
+```
+
+The result reports the observed values, their expectation under random sampling, the 2.5% and 97.5% limits of the simulated distribution, and one-sided permutation $p$-values. A $\Delta^+$ below the lower limit indicates a sample less taxonomically distinct than expected from the pool. The interpretation is conditional on the pool: a different master list defines a different null distribution.
 
 ## Mantel association between distance matrices
 
@@ -229,7 +256,7 @@ A reproducible analysis should state:
 2. the lineage source and retrieval date;
 3. resolved Taxonomicon IDs and treatment of homonyms;
 4. taxa excluded because of missing or disconnected lineages;
-5. the distance definition and classification-depth interpretation;
+5. the distance metric (and, for `"ranked"`, the rank levels) and its classification-depth interpretation;
 6. clustering or ordination settings;
 7. the permutation scheme and number of permutations;
 8. checks for multivariate dispersion where PERMANOVA is used;
@@ -246,6 +273,8 @@ Clarke, K.R. and Warwick, R.M. (1999). The taxonomic distinctness measure of bio
 Clarke, K.R. and Warwick, R.M. (2001). A further biodiversity index applicable to species lists: variation in taxonomic distinctness. *Marine Ecology Progress Series*, 216, 265–278.
 
 Legendre, P. and Anderson, M.J. (1999). Distance-based redundancy analysis: testing multispecies responses in multifactorial ecological experiments. *Ecological Monographs*, 69, 1–24.
+
+Warwick, R.M. and Clarke, K.R. (1995). New 'biodiversity' measures reveal a decrease in taxonomic distinctness with increasing stress. *Marine Ecology Progress Series*, 129, 301–305.
 
 Warton, D.I., Wright, T.W., and Wang, Y. (2012). Distance-based multivariate analyses confound location and dispersion effects. *Methods in Ecology and Evolution*, 3, 89–101.
 

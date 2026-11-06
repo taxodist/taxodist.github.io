@@ -9,9 +9,11 @@ subtitle: "Retrieve ordered taxonomic lineages and compare hierarchy nodes in R,
 
 You can then use those lineages to:
 
-- calculate the distance between two hierarchy nodes;
+- calculate the distance between two hierarchy nodes, under the default reciprocal distance or a path-length, Wu–Palmer, or rank-based alternative;
 - identify their most recent common ancestor (MRCA);
+- inspect the rank of every lineage node;
 - construct pairwise distance matrices for communities;
+- compute taxonomic diversity and distinctness indices;
 - inspect shared and divergent portions of lineages;
 - test or filter clade membership;
 - perform hierarchical clustering and principal coordinates analysis (PCoA);
@@ -39,6 +41,8 @@ The root has depth 1. Consequently, distinct nodes sharing only that root have d
 
 Zero is reserved for identical hierarchy nodes. If one queried node is an ancestor of the other, their distance remains positive. Use `is_member()` when your question is about containment and `taxo_path()` when you want to inspect the route between nodes.
 
+This reciprocal distance is the default. Other metrics are described in [Alternative distance metrics](#alternative-distance-metrics) below.
+
 Within a connected hierarchy, this definition is an ultrametric. Valid Taxonomicon lineages share the retained root `Biota`; infinite distance is a defensive result for disconnected input lineages. If a lineage cannot be retrieved, the corresponding values are missing (`NA` in R and `NaN` in Python or Julia matrices).
 
 ::: {.callout-warning title="Interpretation"}
@@ -51,7 +55,7 @@ Classification depth depends on the source and on which intermediate clades it r
 
 ### R
 
-Install the released package from CRAN:
+Install the released package from CRAN (R 4.1.0 or later):
 
 ```r
 install.packages("taxodist")
@@ -67,10 +71,16 @@ remotes::install_github("rodrigosqrt3/taxodist")
 
 ### Python
 
-Install the released package from PyPI:
+Install the released package from PyPI (Python 3.9 or later):
 
 ```bash
 pip install taxodist
+```
+
+The plotting functions (`taxo_heatmap()`, `plot_taxodist_cluster()`, `plot_taxodist_ord()`) use matplotlib and seaborn, which are optional:
+
+```bash
+pip install "taxodist[plot]"
 ```
 
 Then import it:
@@ -87,7 +97,7 @@ pip install git+https://github.com/rodrigosqrt3/taxodist-py.git
 
 ### Julia
 
-Install the registered package from the Julia General registry:
+Install the registered package from the Julia General registry (Julia 1.10 or later):
 
 ```julia
 using Pkg
@@ -98,6 +108,12 @@ Then load it:
 
 ```julia
 using Taxodist
+```
+
+Plotting is provided through a package extension and is enabled by loading Plots.jl:
+
+```julia
+using Plots   # enables taxo_heatmap(), plot_taxodist_cluster(), plot_taxodist_ord()
 ```
 
 Install the development version from GitHub:
@@ -141,6 +157,8 @@ length(lineage)
 
 The returned character vector, Python list, or Julia vector is ordered from the root to the queried node. Retrieval results are cached automatically during the session.
 
+Lineages are read from the structured hierarchy of the Taxonomicon page, so each node is a clean scientific name: author strings, rank labels, and extinction or type markers are not part of it.
+
 Names are matched after removing surrounding whitespace and collapsing repeated spaces, and the queried name is located in the lineage without regard to letter case: `"tyrannosaurus"` and `" Tyrannosaurus "` resolve to the same node as `"Tyrannosaurus"`.
 
 You can also query a known numeric Taxonomicon ID directly:
@@ -166,6 +184,32 @@ td.get_lineage("50841")
 ```julia
 get_lineage_by_id("50841")
 get_lineage("50841")
+```
+
+:::
+
+### Ranks of the lineage nodes
+
+`lineage_ranks()` returns the same nodes together with the rank recorded by The Taxonomicon (for example `"Kingdom"`, `"Clade"`, `"Superfamily"`, or `"Genus"`) and their depth. Many nodes are unranked clades.
+
+::: {.panel-tabset}
+
+#### R
+
+```r
+lineage_ranks("Passer")
+```
+
+#### Python
+
+```python
+td.lineage_ranks("Passer")
+```
+
+#### Julia
+
+```julia
+lineage_ranks("Passer")
 ```
 
 :::
@@ -218,6 +262,44 @@ result.depth_b
 :::
 
 Examples on this site do not hard-code live distances or lineage depths. The Taxonomicon is an external, curated source, so classifications may change over time. Accessing the returned fields keeps the workflow valid when the source is updated.
+
+### Alternative distance metrics
+
+The `metric` argument of `taxo_distance()`, `distance_matrix()`, `cross_distances()`, `focal_distances()`, `closest_relative()`, `taxo_heatmap()`, and `taxo_bundle()` selects the distance. With $h$ the MRCA depth and $d_A$, $d_B$ the lineage depths:
+
+| `metric` | Distance | Use |
+|---|---|---|
+| `"reciprocal"` (default) | $1/h$ | Ultrametric; emphasizes shallow divergences |
+| `"path"` | $d_A + d_B - 2h$ | Number of edges between the two nodes |
+| `"wu_palmer"` | $1 - 2h/(d_A + d_B)$ | Normalizes for the uneven resolution of different groups |
+| `"ranked"` | Half the path through the standard Linnaean ranks | Step weights of Clarke and Warwick: 1 for congeneric, 2 for confamilial species, ... |
+
+::: {.panel-tabset}
+
+#### R
+
+```r
+taxo_distance("Tyrannosaurus", "Velociraptor", metric = "path")
+taxo_distance("Tyrannosaurus", "Velociraptor", metric = "ranked")
+```
+
+#### Python
+
+```python
+td.taxo_distance("Tyrannosaurus", "Velociraptor", metric="path")
+td.taxo_distance("Tyrannosaurus", "Velociraptor", metric="ranked")
+```
+
+#### Julia
+
+```julia
+taxo_distance("Tyrannosaurus", "Velociraptor"; metric="path")
+taxo_distance("Tyrannosaurus", "Velociraptor"; metric="ranked")
+```
+
+:::
+
+The result records the metric used, and so do distance matrices. See the [methodology](methodology.qmd#alternative-metrics) for the properties of each metric.
 
 ### Most recent common ancestor
 
@@ -514,6 +596,8 @@ heatmap_data = td.taxo_heatmap(distances)
 ### Julia
 
 ```julia
+using Plots
+
 distances = distance_matrix(taxa)
 
 cluster = taxo_cluster(distances)
@@ -530,6 +614,8 @@ taxo_heatmap(distances)
 ::: {.callout-warning title="Check the matrix first"}
 Clustering, ordination, and heatmaps require at least two taxa and a finite, complete distance matrix. The helpers warn and return an empty analysis component when the matrix contains missing or infinite distances.
 :::
+
+When names are supplied instead of a matrix, `metric` and the other arguments of `distance_matrix()` can be passed to `taxo_cluster()`, `taxo_ordinate()`, and `taxo_heatmap()`. In Python, the plotting functions require `pip install "taxodist[plot]"`.
 
 The clustering dendrogram is a visualization of taxonomic hierarchy distances. It is not a phylogeny inferred from characters, sequences, or branch lengths.
 
@@ -570,7 +656,98 @@ cophenetic(tree)                 # equals distance_matrix(taxa)
 
 :::
 
-Unlike a clustering dendrogram, the tree keeps polytomies where the classification records several clades at the same node, and labels every split with its clade name. It remains a representation of the classification, not an inferred phylogeny. All lineages must share the same root; taxa without a lineage are dropped with a warning.
+Unlike a clustering dendrogram, the tree keeps polytomies where the classification records several clades at the same node, and labels every split with its clade name. It remains a representation of the classification, not an inferred phylogeny. All lineages must share the same root; taxa without a lineage are dropped with a warning. The branch lengths reproduce the default reciprocal distance.
+
+## Taxonomic diversity and distinctness
+
+`taxo_distinctness()` computes the indices of Warwick and Clarke for one or more samples: taxonomic diversity (Δ), taxonomic distinctness (Δ\*), average taxonomic distinctness (Δ+), and variation in taxonomic distinctness (Λ+). Samples are given as a vector of names (presence only) or as a table with one row per sample and one column per taxon. By default distances use the `"ranked"` metric, which reproduces the classical step weights; any other metric, or a precomputed matrix, can be supplied.
+
+The example below uses curated lineages with ranks, so it runs offline.
+
+::: {.panel-tabset}
+
+### R
+
+```r
+standard <- c(NA, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
+lineages <- list(
+  Panthera = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"),
+  Felis    = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"),
+  Canis    = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"),
+  Homo     = c("Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"),
+  Musca    = c("Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca")
+)
+example <- taxo_from_lineages(
+  lineages,
+  ranks = setNames(rep(list(standard), length(lineages)), names(lineages))
+)
+d <- distance_matrix(example, metric = "ranked", progress = FALSE)
+
+communities <- rbind(
+  site_1 = c(Panthera = 4, Felis = 2, Canis = 1, Homo = 0, Musca = 0),
+  site_2 = c(Panthera = 1, Felis = 0, Canis = 1, Homo = 2, Musca = 5)
+)
+taxo_distinctness(communities, d)
+
+set.seed(1)
+taxo_distinctness_test(c("Panthera", "Felis", "Canis"), d, n_iter = 499)
+```
+
+### Python
+
+```python
+import pandas as pd
+
+standard = [None, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
+lineages = {
+    "Panthera": ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"],
+    "Felis":    ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Canis":    ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Homo":     ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Musca":    ["Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca"],
+}
+example = td.taxo_from_lineages(
+    lineages, ranks={name: standard for name in lineages}
+)
+d = td.distance_matrix(example, metric="ranked", progress=False)
+
+communities = pd.DataFrame(
+    {"Panthera": [4, 1], "Felis": [2, 0], "Canis": [1, 1], "Homo": [0, 2], "Musca": [0, 5]},
+    index=["site_1", "site_2"],
+)
+td.taxo_distinctness(communities, d)
+
+print(td.taxo_distinctness_test(["Panthera", "Felis", "Canis"], d, n_iter=499, seed=1))
+```
+
+### Julia
+
+```julia
+using DataFrames, Random
+
+standard = [missing, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
+lineages = [
+    "Panthera" => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"],
+    "Felis"    => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Canis"    => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Homo"     => ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Musca"    => ["Biota", "Animalia", "Arthropoda", "Insecta", "Diptera", "Muscidae", "Musca"],
+]
+example = taxo_from_lineages(lineages; ranks=[label => standard for (label, _) in lineages])
+d = distance_matrix(example; metric="ranked", progress=false)
+
+communities = DataFrame(
+    sample=["site_1", "site_2"],
+    Panthera=[4, 1], Felis=[2, 0], Canis=[1, 1], Homo=[0, 2], Musca=[0, 5],
+)
+taxo_distinctness(communities, d)
+
+taxo_distinctness_test(["Panthera", "Felis", "Canis"], d; n_iter=499, rng=Xoshiro(1))
+```
+
+:::
+
+Δ+ and Λ+ use presence only and their expected values do not depend on sampling effort, so a sample can be compared with random samples of the same size drawn from a master list. The random draws differ between languages, so the simulated limits vary slightly. Results of `taxo_distinctness()` agree with `vegan::taxondive()`; see [Statistical Applications](statistical-applications.qmd#taxonomic-diversity-and-distinctness) for interpretation.
 
 ## Coverage, search, and homonyms
 
@@ -603,6 +780,10 @@ get_taxonomicon_id("Tyrannosaurus")
 ```
 
 :::
+
+`taxonomicon_available()` checks quickly whether the server can be reached, which is useful before a long batch or in scripts and examples that should be skipped when there is no connection.
+
+When a name has several biological entries, entries marked as invalid, rejected, nude, or illegitimate names (`nom. inval.`, `nom. rej.`, `nom. nud.`, `nom. illeg.`) are considered only after the others.
 
 When reproducibility matters, record the resolved numeric ID and the retrieval date. This helps distinguish homonyms and documents which external classification was queried.
 
@@ -726,18 +907,22 @@ td.distance_matrix(local, progress=False)
 ### Julia
 
 ```julia
-local = taxo_from_lineages(
-    Dict(
+local_lineages = taxo_from_lineages(
+    [
         "Alpha" => ["Biota", "Animalia", "Alpha"],
         "Beta" => ["Biota", "Animalia", "Beta"],
-    );
+    ];
     source="Curated study",
 )
 
-distance_matrix(local; progress=false)
+distance_matrix(local_lineages; progress=false)
 ```
 
 :::
+
+In Julia, pass a vector of `label => lineage` pairs (or an ordered dictionary) to keep the input order; a plain `Dict` has no defined order, so its labels are sorted.
+
+An optional `ranks` argument supplies the rank of every node (missing for unranked nodes). Ranks are needed only by the `"ranked"` metric; see the example under [Taxonomic diversity and distinctness](#taxonomic-diversity-and-distinctness).
 
 ## Save a portable analysis bundle
 
@@ -775,6 +960,8 @@ distance_matrix(restored)
 :::
 
 Unlike cache files, bundle files are designed for cross-language exchange. Missing distances are stored as JSON `null`; disconnected positive or negative infinity uses the explicit strings `"Infinity"` and `"-Infinity"`.
+
+`taxo_bundle()` accepts `metric`. Bundles use schema 1.1, which records the metric (and, for `"ranked"`, its rank levels) together with the lineage ranks, so the stored matrix can be verified from the stored lineages. Bundles written by earlier versions (schema 1.0) are still read.
 
 ### Compare an analysis with a later repetition
 
@@ -850,7 +1037,11 @@ The three implementations use language-specific cache formats: `.rds` in R, `.pk
 
 Called without a file, `save_cache()` and `load_cache()` use a persistent per-user cache location: `tools::R_user_dir("taxodist", "cache")` in R and the platform's user cache directory in Python and Julia (overridable with the `TAXODIST_CACHE_DIR` environment variable).
 
+Lineages in cache files written before version 1.0.0 were produced by the earlier text parser; `load_cache()` discards them with a warning and keeps only the taxon identifiers, so they are retrieved again with the current parser.
+
 Requests to The Taxonomicon are retried with exponential backoff after network errors and server errors. The number of attempts (default 3) is set with `options(taxodist.max_tries = 5)` in R, `taxodist.fetch.MAX_TRIES = 5` in Python, and `Taxodist.MAX_TRIES[] = 5` in Julia.
+
+Consecutive requests are spaced by at least 0.25 seconds so that large batches do not overload the server. The interval is set with `options(taxodist.min_interval = 0.5)` in R, `taxodist.fetch.MIN_INTERVAL = 0.5` in Python, and `Taxodist.MIN_INTERVAL[] = 0.5` in Julia; 0 disables it.
 
 ## Use the offline reference data
 
@@ -884,7 +1075,7 @@ taxobase.metadata
 
 :::
 
-The three packages distribute equivalent reference content, including component names, taxon order, matrices, examples, and provenance metadata. The object records the date and package version with which it was generated; it is a dated snapshot and may differ slightly from current live lineages. The native package objects remain language-specific.
+The three packages distribute equivalent reference content, including component names, taxon order, matrices, examples, and provenance metadata. The object records the date and package version with which it was generated (for version 1.0.0, rebuilt with the new lineage parser); it is a dated snapshot and may differ slightly from current live lineages. The native package objects remain language-specific.
 
 ## Data source and citation
 

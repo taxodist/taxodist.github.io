@@ -58,12 +58,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./images/favicon-192.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -100,6 +100,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="taxodist - Statistical Applications">
+<meta property="og:description" content="Using taxonomic hierarchy distances in clustering, ordination, diversity analysis, and permutation-based models.">
+<meta property="og:site-name" content="taxodist">
+<meta name="twitter:title" content="taxodist - Statistical Applications">
+<meta name="twitter:description" content="Using taxonomic hierarchy distances in clustering, ordination, diversity analysis, and permutation-based models.">
+<meta name="twitter:card" content="summary">
 </head>
 
 <body class="nav-fixed">
@@ -125,7 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./getting-started.html" rel="" target="">
- <span class="menu-text">Get Started</span></a>
+ <span class="menu-text">Guide</span></a>
   </li>  
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-articles" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
@@ -141,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Statistical Applications</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./cross-language-compatibility.qmd" rel="" target="">
+    <a class="dropdown-item" href="./cross-language-compatibility.html" rel="" target="">
  <span class="dropdown-text">Cross-language Compatibility</span></a>
   </li>  
     </ul>
@@ -162,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <a class="nav-link" href="https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/" rel="" target="">
- <span class="menu-text">Launch App ↗</span></a>
+ <span class="menu-text">Web app</span></a>
   </li>  
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-source" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
@@ -180,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Python source</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="https://github.com/rodrigosqrt3/taxodist-jl" rel="" target="">
+    <a class="dropdown-item" href="https://github.com/rodrigosqrt3/Taxodist.jl" rel="" target="">
  <span class="dropdown-text">Julia source</span></a>
   </li>  
     </ul>
@@ -206,9 +212,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#hierarchical-clustering" id="toc-hierarchical-clustering" class="nav-link" data-scroll-target="#hierarchical-clustering">Hierarchical clustering</a>
   <ul class="collapse">
   <li><a href="#conversion-to-the-phylo-data-structure" id="toc-conversion-to-the-phylo-data-structure" class="nav-link" data-scroll-target="#conversion-to-the-phylo-data-structure">Conversion to the <code>phylo</code> data structure</a></li>
+  <li><a href="#tree-built-directly-from-the-lineages" id="toc-tree-built-directly-from-the-lineages" class="nav-link" data-scroll-target="#tree-built-directly-from-the-lineages">Tree built directly from the lineages</a></li>
   </ul></li>
   <li><a href="#principal-coordinates-analysis" id="toc-principal-coordinates-analysis" class="nav-link" data-scroll-target="#principal-coordinates-analysis">Principal coordinates analysis</a></li>
-  <li><a href="#taxonomic-diversity-and-distinctness" id="toc-taxonomic-diversity-and-distinctness" class="nav-link" data-scroll-target="#taxonomic-diversity-and-distinctness">Taxonomic diversity and distinctness</a></li>
+  <li><a href="#taxonomic-diversity-and-distinctness" id="toc-taxonomic-diversity-and-distinctness" class="nav-link" data-scroll-target="#taxonomic-diversity-and-distinctness">Taxonomic diversity and distinctness</a>
+  <ul class="collapse">
+  <li><a href="#testing-against-a-species-pool" id="toc-testing-against-a-species-pool" class="nav-link" data-scroll-target="#testing-against-a-species-pool">Testing against a species pool</a></li>
+  </ul></li>
   <li><a href="#mantel-association-between-distance-matrices" id="toc-mantel-association-between-distance-matrices" class="nav-link" data-scroll-target="#mantel-association-between-distance-matrices">Mantel association between distance matrices</a></li>
   <li><a href="#permanova" id="toc-permanova" class="nav-link" data-scroll-target="#permanova">PERMANOVA</a>
   <ul class="collapse">
@@ -271,7 +281,7 @@ Scope of inference
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>taxobase<span class="sc">$</span>metadata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The reference set contains 15 mammalian genera representing marsupials and several placental lineages. Its role is methodological: it provides a stable matrix with which to demonstrate downstream analyses.</p>
+<p>The reference set contains 15 Brazilian mammalian genera: one marsupial and representatives of several placental lineages. The matrix uses the default reciprocal distance. Its role is methodological: it provides a stable matrix with which to demonstrate downstream analyses.</p>
 <p>For an empirical study, create the matrix from the taxa observed in the study and record the package version, resolved Taxonomicon IDs, retrieval date, and any exclusions.</p>
 </section>
 <section id="hierarchical-clustering" class="level2">
@@ -303,43 +313,60 @@ A change of class is not phylogenetic inference
 <div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ape<span class="sc">::</span><span class="fu">write.tree</span>(tree_like, <span class="at">file =</span> <span class="st">"taxonomic-distance-dendrogram.nwk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The filename and accompanying metadata should retain the distinction between classification-based clustering and phylogenetic inference.</p>
 </section>
+<section id="tree-built-directly-from-the-lineages" class="level3">
+<h3 class="anchored" data-anchor-id="tree-built-directly-from-the-lineages">Tree built directly from the lineages</h3>
+<p>When the lineages themselves are available, <code>taxo_tree()</code> builds the tree from the classification without a clustering step. Internal nodes carry clade names, polytomies are retained, and patristic distances equal the taxonomic distances exactly. The fixed <code>taxobase</code> object stores matrices rather than lineages, so this example retrieves live lineages:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>classification_tree <span class="ot">&lt;-</span> <span class="fu">taxo_tree</span>(taxa_brazil)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(classification_tree, <span class="at">show.node.label =</span> <span class="cn">TRUE</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Patristic distances reproduce the hierarchy distances</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cophenetic</span>(classification_tree)[<span class="fu">labels</span>(mat), <span class="fu">labels</span>(mat)],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(<span class="fu">distance_matrix</span>(taxa_brazil, <span class="at">progress =</span> <span class="cn">FALSE</span>)),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.attributes =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Because the matrix is ultrametric, average-linkage clustering recovers the same distance levels; <code>hclust()</code> differs only in resolving tied levels into binary merges and in not naming the merges. The same interpretive limits apply to both trees.</p>
+</section>
 </section>
 <section id="principal-coordinates-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="principal-coordinates-analysis">Principal coordinates analysis</h2>
 <p><code>taxo_ordinate()</code> applies classical multidimensional scaling (PCoA) to the distance matrix.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ordination <span class="ot">&lt;-</span> <span class="fu">taxo_ordinate</span>(mat, <span class="at">k =</span> <span class="dv">2</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ordination)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ordination, <span class="at">main =</span> <span class="st">"PCoA of taxonomic hierarchy distances"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ordination <span class="ot">&lt;-</span> <span class="fu">taxo_ordinate</span>(mat, <span class="at">k =</span> <span class="dv">2</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ordination)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ordination, <span class="at">main =</span> <span class="st">"PCoA of taxonomic hierarchy distances"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The coordinates provide a low-dimensional representation of the pairwise distances. They do not create new evolutionary measurements; proximity in the ordination reflects similarity under the same hierarchy-depth metric.</p>
 <p>Inspect the eigenvalues and goodness-of-fit before interpreting the plot:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ordination<span class="sc">$</span>eig</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ordination<span class="sc">$</span>GOF</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ordination<span class="sc">$</span>eig</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ordination<span class="sc">$</span>GOF</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Negative eigenvalues indicate that the dissimilarities are not represented exactly in Euclidean space. The first goodness-of-fit value follows the absolute-eigenvalue denominator used by <code>cmdscale()</code>; the second uses the sum of positive eigenvalues.</p>
 </section>
 <section id="taxonomic-diversity-and-distinctness" class="level2">
 <h2 class="anchored" data-anchor-id="taxonomic-diversity-and-distinctness">Taxonomic diversity and distinctness</h2>
-<p><code>vegan::taxondive()</code> accepts a community matrix and a species-level dissimilarity object. The column names of the community matrix must correspond to the labels of the distance object.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>comm <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">3</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"community_A"</span>, <span class="st">"community_B"</span>, <span class="st">"community_C"</span>),</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    taxa_brazil</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>diversity <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">taxondive</span>(comm, mat, <span class="at">match.force =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>diversity</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(diversity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The principal quantities reported by <code>taxondive()</code> are:</p>
+<p><code>taxo_distinctness()</code> computes the indices of Clarke and Warwick directly, for one or more samples given as a community matrix (one row per sample, one column per taxon) or as a vector of names. The column names of the community matrix must correspond to the labels of the distance object. The same values are returned by <code>vegan::taxondive()</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>comm <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">3</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"community_A"</span>, <span class="st">"community_B"</span>, <span class="st">"community_C"</span>),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    taxa_brazil</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">taxo_distinctness</span>(comm, mat)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># The same indices with vegan</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>diversity <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">taxondive</span>(comm, mat, <span class="at">match.force =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(diversity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The principal quantities are:</p>
 <ul>
 <li><strong>Delta</strong> (<span class="math inline">\(\Delta\)</span>): taxonomic diversity, incorporating abundance and distances between pairs of taxa;</li>
 <li><strong>Delta*</strong> (<span class="math inline">\(\Delta^*\)</span>): taxonomic distinctness, standardized by the abundance products for pairs of different taxa;</li>
@@ -357,32 +384,50 @@ Distance scaling matters
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The absolute values of these indices depend on the supplied dissimilarities. Traditional applications often use step distances derived from a rank table. Supplying <code>taxodist</code> values instead answers a different, explicit question based on reciprocal MRCA depth. Comparisons should therefore use the same source, cleaning rules, and distance definition throughout.</p>
+<p>The absolute values of these indices depend on the supplied dissimilarities. Traditional applications use step distances between Linnaean rank levels; <code>metric = "ranked"</code> reproduces these step weights (1 for congeneric species, 2 for confamilial species, and so on), and it is the default of <code>taxo_distinctness()</code> when no matrix is supplied. Supplying reciprocal MRCA-depth distances, as in the fixed matrix above, answers a different, explicit question that uses the full resolution of the classification. Comparisons should therefore use the same source, parser version, and metric throughout.</p>
 </div>
 </div>
+<p>With live lineages, the classical step-weight indices are obtained from the <code>"ranked"</code> metric, either by computing the matrix explicitly or by letting <code>taxo_distinctness()</code> compute it from the column names of <code>comm</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ranked <span class="ot">&lt;-</span> <span class="fu">distance_matrix</span>(taxa_brazil, <span class="at">metric =</span> <span class="st">"ranked"</span>, <span class="at">progress =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">taxo_distinctness</span>(comm, ranked)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">taxo_distinctness</span>(comm, <span class="at">progress =</span> <span class="cn">FALSE</span>)   <span class="co"># same result; metric = "ranked" by default</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="testing-against-a-species-pool" class="level3">
+<h3 class="anchored" data-anchor-id="testing-against-a-species-pool">Testing against a species pool</h3>
+<p><span class="math inline">\(\Delta^+\)</span> and <span class="math inline">\(\Lambda^+\)</span> have expected values that do not depend on the number of taxa, so a sample can be compared with random samples of the same size drawn from a master list. Here the 15 genera act as the pool:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">taxo_distinctness_test</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"Panthera"</span>, <span class="st">"Puma"</span>, <span class="st">"Chrysocyon"</span>, <span class="st">"Pteronura"</span>, <span class="st">"Tapirus"</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  mat,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_iter =</span> <span class="dv">999</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>test</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>statistics</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The result reports the observed values, their expectation under random sampling, the 2.5% and 97.5% limits of the simulated distribution, and one-sided permutation <span class="math inline">\(p\)</span>-values. A <span class="math inline">\(\Delta^+\)</span> below the lower limit indicates a sample less taxonomically distinct than expected from the pool. The interpretation is conditional on the pool: a different master list defines a different null distribution.</p>
+</section>
 </section>
 <section id="mantel-association-between-distance-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="mantel-association-between-distance-matrices">Mantel association between distance matrices</h2>
 <p>A Mantel test evaluates association between corresponding entries of two dissimilarity matrices. For example, a taxonomic hierarchy matrix could be compared with an independently measured trait-distance matrix.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># traits must contain numeric measurements for the same taxa.</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The rows are reordered explicitly before distance calculation.</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"trait-data.csv"</span>, <span class="at">row.names =</span> <span class="dv">1</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> traits[<span class="fu">labels</span>(mat), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">rownames</span>(traits), <span class="fu">labels</span>(mat)),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">all</span>(<span class="fu">vapply</span>(traits, is.numeric, <span class="fu">logical</span>(<span class="dv">1</span>)))</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>trait_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(<span class="fu">scale</span>(traits))</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>vegan<span class="sc">::</span><span class="fu">mantel</span>(</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  mat,</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  trait_dist,</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span>,</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">permutations =</span> <span class="dv">9999</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># traits must contain numeric measurements for the same taxa.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The rows are reordered explicitly before distance calculation.</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"trait-data.csv"</span>, <span class="at">row.names =</span> <span class="dv">1</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>traits <span class="ot">&lt;-</span> traits[<span class="fu">labels</span>(mat), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">rownames</span>(traits), <span class="fu">labels</span>(mat)),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">all</span>(<span class="fu">vapply</span>(traits, is.numeric, <span class="fu">logical</span>(<span class="dv">1</span>)))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>trait_dist <span class="ot">&lt;-</span> <span class="fu">dist</span>(<span class="fu">scale</span>(traits))</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>vegan<span class="sc">::</span><span class="fu">mantel</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  mat,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  trait_dist,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">permutations =</span> <span class="dv">9999</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The Mantel statistic is a matrix correlation; its permutation procedure accounts for the non-independence of pairwise entries under its null model. The result does not estimate a causal effect.</p>
 <p>By default, <code>vegan::mantel()</code> evaluates positive association. State the correlation method, permutation count, and alternative hypothesis when reporting the analysis.</p>
 <div class="callout callout-style-default callout-warning callout-titled" title="Use Mantel tests for matrix-association questions">
@@ -402,29 +447,29 @@ Use Mantel tests for matrix-association questions
 <section id="permanova" class="level2">
 <h2 class="anchored" data-anchor-id="permanova">PERMANOVA</h2>
 <p><code>vegan::adonis2()</code> partitions variation in a dissimilarity matrix among predictors. Metadata rows must be in exactly the same order as the taxa represented by the matrix.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># metadata must be measured independently of the taxonomic distances.</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"taxon-metadata.csv"</span>, <span class="at">row.names =</span> <span class="dv">1</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata[<span class="fu">labels</span>(mat), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">identical</span>(<span class="fu">rownames</span>(metadata), <span class="fu">labels</span>(mat)))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">adonis2</span>(</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  mat <span class="sc">~</span> habitat,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> metadata,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">permutations =</span> <span class="dv">9999</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># metadata must be measured independently of the taxonomic distances.</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"taxon-metadata.csv"</span>, <span class="at">row.names =</span> <span class="dv">1</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata[<span class="fu">labels</span>(mat), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">identical</span>(<span class="fu">rownames</span>(metadata), <span class="fu">labels</span>(mat)))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">adonis2</span>(</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  mat <span class="sc">~</span> habitat,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> metadata,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">permutations =</span> <span class="dv">9999</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <span class="math inline">\(R^2\)</span> column reports the proportion of the total sum of squares attributed to the model. The permutation <span class="math inline">\(p\)</span>-value evaluates the selected null hypothesis under the specified permutation design.</p>
 <section id="examine-multivariate-dispersion" class="level3">
 <h3 class="anchored" data-anchor-id="examine-multivariate-dispersion">Examine multivariate dispersion</h3>
 <p>PERMANOVA can reflect differences in within-group dispersion as well as differences in group location. Evaluate dispersion using the same distance matrix and grouping variable:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dispersion <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">betadisper</span>(mat, metadata<span class="sc">$</span>habitat)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(dispersion)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">permutest</span>(dispersion, <span class="at">permutations =</span> <span class="dv">9999</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(dispersion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dispersion <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">betadisper</span>(mat, metadata<span class="sc">$</span>habitat)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(dispersion)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">permutest</span>(dispersion, <span class="at">permutations =</span> <span class="dv">9999</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(dispersion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Interpret <code>adonis2()</code> together with the dispersion analysis, sample sizes, design, and ordination. Restricted permutations should be used for blocks, repeated measurements, nested sampling, or other non-exchangeable designs.</p>
 <div class="callout callout-style-default callout-important callout-titled" title="Avoid circular tests">
 <div class="callout-header d-flex align-content-center">
@@ -449,7 +494,7 @@ Avoid circular tests
 <li>the lineage source and retrieval date;</li>
 <li>resolved Taxonomicon IDs and treatment of homonyms;</li>
 <li>taxa excluded because of missing or disconnected lineages;</li>
-<li>the distance definition and classification-depth interpretation;</li>
+<li>the distance metric (and, for <code>"ranked"</code>, the rank levels) and its classification-depth interpretation;</li>
 <li>clustering or ordination settings;</li>
 <li>the permutation scheme and number of permutations;</li>
 <li>checks for multivariate dispersion where PERMANOVA is used;</li>
@@ -463,14 +508,15 @@ Avoid circular tests
 <p>Clarke, K.R. and Warwick, R.M. (1999). The taxonomic distinctness measure of biodiversity: weighting of step lengths between hierarchical levels. <em>Marine Ecology Progress Series</em>, 184, 21–29.</p>
 <p>Clarke, K.R. and Warwick, R.M. (2001). A further biodiversity index applicable to species lists: variation in taxonomic distinctness. <em>Marine Ecology Progress Series</em>, 216, 265–278.</p>
 <p>Legendre, P. and Anderson, M.J. (1999). Distance-based redundancy analysis: testing multispecies responses in multifactorial ecological experiments. <em>Ecological Monographs</em>, 69, 1–24.</p>
+<p>Warwick, R.M. and Clarke, K.R. (1995). New ‘biodiversity’ measures reveal a decrease in taxonomic distinctness with increasing stress. <em>Marine Ecology Progress Series</em>, 129, 301–305.</p>
 <p>Warton, D.I., Wright, T.W., and Wang, Y. (2012). Distance-based multivariate analyses confound location and dispersion effects. <em>Methods in Ecology and Evolution</em>, 3, 89–101.</p>
 <p>Brands, S.J. (1989 onwards). <em>Systema Naturae 2000</em>. Amsterdam, The Netherlands. Retrieved from The Taxonomicon, <a href="http://taxonomicon.taxonomy.nl" class="uri">http://taxonomicon.taxonomy.nl</a>.</p>
-<p><a href="./methodology.html" class="btn btn-outline-secondary" role="button">← Methodology</a> <a href="cross-language-compatibility.qmd" class="btn btn-outline-primary" role="button">Cross-language Compatibility →</a></p>
+<p><a href="./methodology.html" class="btn btn-outline-secondary" role="button">← Methodology</a> <a href="./cross-language-compatibility.html" class="btn btn-outline-primary" role="button">Cross-language Compatibility →</a></p>
 
 
 </section>
 
-</main> <!-- /main -->
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -822,8 +868,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">taxodist 0.6.0</div>   
-    <div class="nav-footer-center">Taxonomic hierarchy distances — not evolutionary time or branch length.</div>
+    <div class="nav-footer-left">taxodist 1.0.0</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item">
