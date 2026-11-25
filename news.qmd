@@ -1,199 +1,81 @@
 ---
 title: "Changelog"
-subtitle: "Release history for taxodist, from version 0.1.0 through the first stable release, 1.0.0."
+subtitle: "Release history for taxodist, newest first, from version 1.1.0 back to version 0.1.0."
 ---
 
-## taxodist 0.1.0 — Initial release
+Releases are listed newest first. Dates are the publication dates on CRAN (R) and PyPI (Python); the Julia package is distributed through the [General registry](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist) from version 0.6.0 onwards. The earliest Python release listed on PyPI is 0.3.0.
 
-- Introduced taxonomic distance calculations using lineage data from The Taxonomicon.
-- Added session-level lineage caching to reduce repeated network requests.
-- Initial functions: `taxo_distance()`, `mrca()`, `distance_matrix()`, `closest_relative()`, `compare_lineages()`, `shared_clades()`, `is_member()`, `filter_clade()`, `lineage_depth()`, `check_coverage()`, and `clear_cache()`.
-
-## taxodist 0.2.0
-
-### New functions
-
-- Added `taxo_cluster()` for hierarchical clustering of taxonomic distances.
-- Added `taxo_ordinate()` for principal coordinates analysis (PCoA).
-- Added `save_cache()` and `load_cache()` for persistence across sessions.
-- Added `taxo_path()`, which represents the node-by-node route from taxon A through the MRCA to taxon B.
-
-### Documentation and integration
-
-- Added statistical examples using `vegan` for taxonomic distinctness, Mantel tests, and PERMANOVA.
-- Documented conversion of `taxo_cluster()` results to the `phylo` storage class with `ape::as.phylo()`.
-
-### Corrections
-
-- Prevented unnamed crown markers from being interpreted as common ancestry across unrelated lineages.
-- Expanded cleaning of rank prefixes such as cohort, magnorder, grandorder, parvorder, and legion.
-
-## taxodist 0.3.0
-
-### Name resolution and network handling
-
-- Added `taxo_search()` for inspecting Taxonomicon search results and numeric identifiers.
-- Added direct support for numeric Taxonomicon IDs in `get_lineage()` and downstream distance functions.
-- Added request timeouts and clearer handling of network failures and non-successful HTTP responses.
-- Added warnings for multiple valid biological entries, making homonym ambiguity explicit.
-
-### Lineage parsing
-
-- Expanded removal of rank labels and navigation artifacts.
-- Collapsed duplicated lineage nodes while preserving their original order.
-- Improved taxonomic redirect handling and removal of interface noise.
-- Restricted cleaned lineages to nodes beginning at `Biota` when available.
-- Added validation for non-numeric inputs to `get_lineage_by_id()`.
-- Corrected species-level lineages, quoted author names, and genus retention.
-
-## taxodist 0.4.0
-
-### New functions
-
-- Added `cache_info()` to report cached lineages, identifiers, and memory use.
-- Added `focal_distances()` to compare one focal taxon with every member of a community while reporting distance, MRCA, and MRCA depth.
-
-### Lineage parsing
-
-- Corrected handling of `Subphylum` and `Infraphylum` prefixes.
-- Improved removal of extinction markers, `auct.` annotations, author strings, ampersands, hyphenated names, and incomplete trailing citations.
-
-## taxodist 0.5.0
-
-### Reference data
-
-- Added `taxobase`, an offline reference object containing taxa, coverage information, lineages, search examples, pairwise results, and precomputed distance matrices.
-
-### Corrections
-
-- Prevented biological names containing the substring `planet`, such as *Periplaneta*, from being classified as astronomical entries.
-- Corrected lineage truncation when a genus page does not link directly back to the genus itself.
-- Added `Epifamily` to the rank-token filter.
-- Corrected parsing around superscript type markers and target names appearing in page-navigation text.
-
-## taxodist 0.6.0
-
-### Distance definition
-
-- Zero distance is now reserved for identical complete lineages.
-- Distinct ancestor–descendant nodes receive $1 / \operatorname{depth}(\operatorname{MRCA})$ rather than zero.
-- The measure is now described consistently as a **taxonomic hierarchy distance**, not a phylogenetic distance.
-- Within each connected hierarchy, the resulting distance is an ultrametric.
-
-::: {.callout-important title="Behavioral change"}
-Analyses that relied on version 0.5.0 or earlier should be recomputed when ancestor–descendant pairs are present. Use `is_member()` for clade containment and `taxo_path()` to inspect the route between hierarchy nodes.
+::: {.callout-note title="Cross-language compatibility"}
+The R, Python, and Julia implementations follow the same distance semantics. Their native containers differ: R uses `dist`, S3 objects, and `.rds` cache files; Python uses labeled `pandas` objects, dictionaries, and `.pkl` cache files; Julia uses `TaxonomicDistanceMatrix`, named tuples, `DataFrame` objects, and `.json` cache files.
 :::
 
-### Data and documentation
+Validation and benchmark notes for earlier releases are kept in the [archive](#archive-earlier-validation-and-performance-notes) at the end of this page.
 
-- Standardized `taxobase` as a documented list with provenance metadata and offline matrices used by reproducible examples.
-- Aligned the R, Python, and Julia reference data, taxon ordering, distance definition, and principal API behavior.
-- Added explicit methodological documentation, limitations, and separate citations for the software and The Taxonomicon.
-- Revised statistical examples to distinguish taxonomic dendrograms from inferred phylogenetic trees.
-- Added the Julia implementation and registered distribution, with the same distance definition, principal API, labeled matrices, cache persistence, analysis helpers, and packaged `taxobase` reference data.
+## taxodist 1.1.0 [Latest]{.badge .bg-primary}
 
-### Robustness
+Lineages can now come from three classifications, the dependence of an analysis on the classification can be measured, and community analyses gain taxonomic dissimilarity between samples and standardized effect sizes. The distance metrics and the bundle format (schema 1.1) are unchanged: distances computed from The Taxonomicon are identical to version 1.0.0 (except for the rare pages without a structured hierarchy; see Corrections), and bundles written by either version are read by both.
 
-- MRCA detection now uses only the continuous common prefix of the two ordered lineages.
-- `is_member()` now uses exact, case-insensitive matching.
-- `taxo_path()` now handles identical nodes, ancestor–descendant pairs, full lineage depths, path direction, and lineages without a common ancestor.
-- Empty and single-taxon inputs are handled consistently across matrix, nearest-relative, focal-distance, clustering, ordination, and heatmap functions.
-- Clustering, ordination, and heatmap helpers detect missing and infinite distances before downstream analysis.
-- `taxo_ordinate()` validates and, when necessary, reduces the requested number of dimensions.
-- `load_cache()` validates names and value types before modifying the active cache.
+::: {.release-dates}
+**Release date to be confirmed** — R, Python, and Julia
+:::
 
-## Cross-language compatibility note
+### New taxonomic sources
 
-The R, Python, and Julia implementations follow the same distance semantics. Their native containers differ: R uses `dist`, S3 objects, and `.rds` cache files; Python uses labeled `pandas` objects, dictionaries, and `.pkl` cache files; Julia uses `TaxonomicDistanceMatrix`, named tuples, `DataFrame` objects, and `.json` cache files.
+- `taxo_resolve()` and `taxo_bundle()` gain a `source` argument. Besides The Taxonomicon (`"taxonomicon"`, the default), lineages can be retrieved from the Open Tree of Life reference taxonomy (`"ott"`) and the NCBI Taxonomy (`"ncbi"`), through their public APIs. The resulting resolutions work with every function that accepts one: `distance_matrix()`, `cross_distances()`, `taxo_tree()`, `taxo_bundle()`, and, through the matrix, `taxo_distinctness()`. Identifiers carry a source prefix (`"ott:770309"`, `"ncbi:9606"`), ranks are recorded in the same form as for The Taxonomicon, and the resolution and its bundles record the source and, for the Open Tree Taxonomy, its version.
+- Requests to each source are spaced independently. NCBI requests are spaced by at least 0.4 s, below its limit of three per second (0.12 s with an API key, set in the `NCBI_API_KEY` environment variable, or `options(taxodist.ncbi_api_key)` in R, `taxodist.sources.NCBI_API_KEY` in Python, `Taxodist.NCBI_API_KEY[]` in Julia), and refused requests (HTTP 429) are retried after a pause.
+- `taxo_sources()` lists the supported sources with their licence and citation.
+- `compare_sources()` resolves the same taxa in several sources and reports the lineage depth of every taxon in each, and the agreement between their distance matrices (Spearman correlation and Mantel permutation test), i.e. how much an analysis depends on the classification it is based on.
+- See [Taxonomic sources](sources.qmd).
 
-## taxodist 0.7.0
+### Community analyses
+
+- `taxo_dissimilarity()` computes the taxonomic dissimilarities Γ+ and Θ+ of Clarke, Somerfield and Chapman (2006) between samples, for ordination, clustering, or PERMANOVA. They credit closely related taxa as near matches, so samples without any taxon in common can still be compared; on a flat classification they reduce to the presence/absence Bray–Curtis (Sørensen) and Kulczynski dissimilarities, which the tests verify against `vegan::vegdist()`.
+- `taxo_ses()` computes the standardized effect sizes of the mean pairwise distance (NRI) and the mean nearest-taxon distance (NTI) of Webb et al. (2002) on taxonomic distances, under a species-pool null model or the independent swap, optionally weighted by abundance as in the picante package.
+- See [Community analyses](community-analyses.qmd).
+
+### Name resolution
+
+- A candidate nested in another candidate of the same name, such as the nominotypical subgenus *Mus (Mus)* inside the genus *Mus*, is no longer counted as a homonym, in `taxo_resolve()` and in name-based functions. Names such as `"Mus"`, `"Oncorhynchus"`, or `"Leishmania"` are therefore resolved instead of ambiguous, and no homonym warning is emitted for them. The lineage is unchanged, since it was already truncated at the queried name.
 
 ### Performance
 
-- R now fills the compact lower-triangular `dist` representation directly instead of allocating a full square intermediate matrix.
-- Python now reuses a persistent HTTP session across Taxonomicon requests, enabling connection pooling without changing public behavior.
-- All three implementations use streamlined numeric pairwise paths for matrix construction and reuse final name-resolved lineages during warm calls.
-
-### Compatibility and validation
-
-- Preserved the public API and continuous-prefix MRCA distance semantics.
-- Revalidated reference matrices, resolved identifiers, lineage outputs, and optimized matrix paths across R, Python, and Julia.
-- Julia now reads intermediate hierarchy nodes rendered as plain text and aligns ambiguous-name matching with the whole-word behavior used by R and Python.
-- Expanded deterministic and regression coverage; each implementation reports complete coverage under its language-specific coverage measure.
-- Improved cache inspection and clearing in the R implementation by addressing the private cache environment explicitly.
-
-## taxodist 0.8.0
-
-### Auditable name resolution
-
-- Added `taxo_resolve()` for batch resolution with explicit `resolved`, `ambiguous`, `unresolved`, and `retrieval_error` statuses.
-- Preserved all candidate matches, selected identifiers, resolved names, lineage depths, and root-to-tip lineages for every input.
-- Added explicit ambiguity policies: warn and select the first candidate, select silently, or stop and require review.
-- Repeated names are retrieved only once while their original order and repetition remain in the audit table.
-- `distance_matrix()` accepts resolution objects directly and reuses stored lineages without further network requests.
-
-### Offline classifications
-
-- Added `taxo_from_lineages()` for curated, frozen, unpublished, or fully offline classifications.
-- Added deterministic custom identifiers and optional user-supplied identifiers.
-- Offline resolutions use the same distance, validation, and bundle APIs as live Taxonomicon resolutions.
-
-### Portable analysis bundles
-
-- Added `taxo_bundle()` to combine the resolution audit, labeled matrix, metric definition, software metadata, and source provenance.
-- Added `write_taxodist_bundle()` and `read_taxodist_bundle()` using a shared JSON schema across R, Python, and Julia.
-- Missing distances use JSON `null`; disconnected infinities use `"Infinity"` and `"-Infinity"`.
-- Bundle validation checks required fields, statuses, candidate counts, selected IDs, lineage depths, matrix labels, symmetry, and agreement between stored lineages and distances.
-
-### Robustness and compatibility
-
-- Preserved the continuous-prefix MRCA distance definition and established public workflows.
-- Improved retrieval-error reporting, structured lineage parsing, name-resolution caching, and source provenance.
-- Expanded deterministic regression tests to complete source coverage in all three implementations.
-
-## taxodist 0.9.0
-
-Version 0.9.0 was released simultaneously for R, Python, and Julia. The distance definition and the bundle schema (version 1.0) are unchanged; bundles written by any of the three implementations are read by the other two without differences.
+- `distance_matrix()` and `cross_distances()`, and therefore `taxo_cluster()`, `taxo_ordinate()`, `taxo_heatmap()`, `taxo_bundle()`, and `taxo_distinctness()`, compute common-ancestor depths with a sorted index of the lineages: in lexicographic order, the common prefix of two lineages is the minimum of the common prefixes of the neighbouring lineages between them. The depths from one taxon to all others then take two cumulative minima instead of a node-by-node comparison of every pair. Results are identical. In R, a matrix of 2000 taxa is about 10 times faster (5000 taxa: 27 s to 2 s); in Python, a matrix of 5000 taxa is about 4 times faster (3.7 s to 0.9 s); in Julia, 5000 synthetic taxa take about 0.22–0.25 s instead of 0.41–0.65 s.
 
 ### Corrections
 
-- `taxo_resolve()` now truncates each selected lineage at the queried taxon exactly as `get_lineage()` does. Previously it stored the lineage of the retrieved page unchanged; for genera whose page does not list the genus itself (for example *Periplaneta*), the lineage ended at the family, `resolved_name` reported the family, and `distance_matrix(taxo_resolve(x))` could differ from `distance_matrix(x)`. Bundles built from such resolutions inherited the difference.
-- Cleaned and uncleaned lineages are cached separately. A call with `clean = FALSE` previously replaced the cleaned entry, so later calls returned nodes above `Biota` for the rest of the session.
-- Queried names are normalized (surrounding and repeated whitespace) and located in the lineage without regard to letter case. Previously `"tyrannosaurus"` or `"Tyrannosaurus "` added a spurious terminal node, increasing lineage depth.
-- `taxo_heatmap()` passes plotting arguments only to the plotting function (R and Julia previously forwarded them to `distance_matrix()`; Python rejected `cmap` and `annot`). `verbose` and `progress` are explicit arguments.
-- `cache_info()` reports the names of cached taxa together with their identifiers (`ids`); it previously listed identifiers only.
-- `get_lineage_by_id()` accepts numeric identifiers and reports an informative error for several identifiers.
-- Python: the User-Agent header and bundle metadata report the installed version, `distance_matrix()` rejects a single string, and each candidate lineage is retrieved once during disambiguation.
+- The plain-text fallback parser, used for pages without the structured hierarchy block, kept the no-break spaces that indent The Taxonomicon tree, so rank labels were not removed and nodes such as `"Clade"` or `"Domain"` could enter the lineage (R and Julia). A shared fixture (`expected_text_fallback.json`) now checks the three implementations.
+- Taxon names are normalized with Unicode whitespace, such as the no-break space, as well as ASCII whitespace.
+- R: `write_taxodist_bundle()` writes distances with 17 significant digits, so they are read back exactly, as in the Python and Julia writers. Previously 15 digits were used.
 
 ### Behavior changes
 
-::: {.callout-important title="Changed return values"}
-- `check_coverage()` reports an unknown result (`NA` in R, `pd.NA` in Python, `missing` in Julia) when The Taxonomicon could not be reached. Such names were previously reported as absent.
-- `save_cache()` returns the path of the written file.
-- Using a bundle in `distance_matrix()` or printing it validates its structure only. The complete recomputation of every stored distance is performed when a bundle is written or read.
-:::
+- `metric` must be a single string. In R a vector of several metrics was silently reduced to its first element; it is now an error, as in Python and Julia, with the same message in the three implementations.
+- `compare_bundles()` reports the metric of each bundle (`metric_old`, `metric_new`) and whether it changed (`metric_changed`), and its printed form warns when the distances are not comparable.
+- The HTTP user agent follows a format shared by the three implementations: `taxodist/<version> (<language>; +https://taxodist.github.io)`.
 
-### New functions and arguments
+### Python-specific changes
 
-- `taxo_tree()` builds a tree directly from lineages. Internal nodes are the named clades at which the supplied taxa diverge; clades with a single descendant are collapsed. Branch lengths place a clade at depth $h$ at height $1/(2h)$, so the tree is ultrametric and its patristic distances equal `distance_matrix()`. R returns an `ape`-compatible `phylo` object; Python and Julia return a `TaxodistTree` with Newick export.
-- `cross_distances(x, y)` computes the rectangular matrix between two sets of taxa.
-- `compare_bundles(old, new)` classifies every input as unchanged, added, removed, or changed in status, identifier, or lineage, and lists the pairwise distances that changed. Bundle files can be passed by path.
-- `taxo_resolve()` and `taxo_bundle()` gain `within`, which restricts candidates to those whose lineage contains a given clade.
-- `save_cache()` and `load_cache()` default to a persistent per-user cache file.
+- `compare_sources()` and `taxo_ses()` take `seed=` for reproducible random draws; `print_taxodist_ses()` prints an effect-size table with its settings. `taxo_dissimilarity()` returns a square `pandas.DataFrame` (`attrs["method"]`, `attrs["metric"]`).
+- `taxo_cluster()` reproduces R's `stats::hclust()` exactly (a port of R's Fortran routines): merges, heights, and leaf order equal R's for all eight methods, including tied distances, and `"ward.D"`, `"ward.D2"`, and `"mcquitty"` are accepted. `"hclust"` is still a SciPy linkage matrix; the result also contains R's `"merge"`, `"height"`, and `"order"`.
+- `closest_relative()` and `focal_distances()` keep the input order of tied distances.
+- `taxo_bundle()` labels a resolution without a source as coming from The Taxonomicon, as R does, instead of raising an error.
+- The package defines `__all__`, listing the public API.
 
-### Performance and network handling
+### Julia-specific changes
 
-- Distance matrices are computed from integer prefix identifiers: each node is mapped to an integer identifying its complete path from the root, so the MRCA depth of two taxa is the number of depths at which the identifiers agree.
-- Requests are retried with exponential backoff after network errors and server errors (5xx); the number of attempts is configurable.
+- `compare_sources()` and `taxo_ses()` take `rng` (for example `Random.Xoshiro(1)`) for reproducible random draws. `taxo_dissimilarity()` returns a `TaxonomicDistanceMatrix` between samples whose new `method` field records the index; `taxo_ses()` returns a `TaxodistSES`; `compare_sources()` returns a `TaxodistSourceComparison`. NCBI's XML is read by a small internal reader, so no dependency was added.
+- `taxo_cluster()` uses a port of R's `stats::hclust()` instead of Clustering.jl's `hclust()`, so merges, heights, and leaf order equal R's for every method, also with tied distances. `"mcquitty"`, `"median"`, and `"centroid"` are now available, and `"ward.D"` and `"ward.D2"` are accepted. The result still holds a `Clustering.Hclust`.
+- `focal_distances()` gives a `missing` `mrca_depth` for a community taxon that cannot be found, instead of 0.
+- `ambiguity` must be exactly `"warn"`, `"first"`, or `"error"`, as in Python.
+- `taxo_distinctness()` returns a `TaxodistDistinctness`, displayed like R's printed result; its `metric` and `data` fields, indexing by name, and destructuring work as before.
 
-### Web application
-
-- The application uses the 0.9.0 packages, adds a between-groups tab and classification trees, reports names that were not found and the entry chosen for ambiguous names, offers CSV, PNG, Newick, and bundle downloads, and supports links that reopen a query.
-- Its bundled lineage cache was rebuilt; a cache produced by an earlier parser is no longer loaded.
-
-## taxodist 1.0.0 [Latest]{.badge .bg-primary}
+## taxodist 1.0.0
 
 First stable release, published simultaneously for R, Python, and Julia. The default distance metric, the other metrics, and the bundle format (schema 1.1) are now stable: later 1.x releases will keep their definitions and continue to read bundles written by this version.
+
+::: {.release-dates}
+**Released** — R: 2026-11-06 on [CRAN](https://cran.r-project.org/package=taxodist) · Python: 2026-11-05 on [PyPI](https://pypi.org/project/taxodist/1.0.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
+:::
 
 ### New features
 
@@ -238,3 +120,258 @@ Lineages are now read from the structure of The Taxonomicon page instead of its 
 - R: xml2 moved from Suggests to Imports.
 - Python: matplotlib and seaborn are now optional and installed with `pip install "taxodist[plot]"`; Python 3.8 is no longer supported. The bundle JSON schema is included in the package.
 - Julia: Plots.jl is now a weak dependency loaded through a package extension, so `using Taxodist` no longer loads Plots; run `using Plots` to enable plotting.
+
+## taxodist 0.9.0
+
+Version 0.9.0 was released simultaneously for R, Python, and Julia. The distance definition and the bundle schema (version 1.0) are unchanged; bundles written by any of the three implementations are read by the other two without differences.
+
+::: {.release-dates}
+**Released** — R: 2026-10-12 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.9.0.tar.gz)) · Python: 2026-10-12 on [PyPI](https://pypi.org/project/taxodist/0.9.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
+:::
+
+### Corrections
+
+- `taxo_resolve()` now truncates each selected lineage at the queried taxon exactly as `get_lineage()` does. Previously it stored the lineage of the retrieved page unchanged; for genera whose page does not list the genus itself (for example *Periplaneta*), the lineage ended at the family, `resolved_name` reported the family, and `distance_matrix(taxo_resolve(x))` could differ from `distance_matrix(x)`. Bundles built from such resolutions inherited the difference.
+- Cleaned and uncleaned lineages are cached separately. A call with `clean = FALSE` previously replaced the cleaned entry, so later calls returned nodes above `Biota` for the rest of the session.
+- Queried names are normalized (surrounding and repeated whitespace) and located in the lineage without regard to letter case. Previously `"tyrannosaurus"` or `"Tyrannosaurus "` added a spurious terminal node, increasing lineage depth.
+- `taxo_heatmap()` passes plotting arguments only to the plotting function (R and Julia previously forwarded them to `distance_matrix()`; Python rejected `cmap` and `annot`). `verbose` and `progress` are explicit arguments.
+- `cache_info()` reports the names of cached taxa together with their identifiers (`ids`); it previously listed identifiers only.
+- `get_lineage_by_id()` accepts numeric identifiers and reports an informative error for several identifiers.
+- Python: the User-Agent header and bundle metadata report the installed version, `distance_matrix()` rejects a single string, and each candidate lineage is retrieved once during disambiguation.
+
+### Behavior changes
+
+::: {.callout-important title="Changed return values"}
+- `check_coverage()` reports an unknown result (`NA` in R, `pd.NA` in Python, `missing` in Julia) when The Taxonomicon could not be reached. Such names were previously reported as absent.
+- `save_cache()` returns the path of the written file.
+- Using a bundle in `distance_matrix()` or printing it validates its structure only. The complete recomputation of every stored distance is performed when a bundle is written or read.
+:::
+
+### New functions and arguments
+
+- `taxo_tree()` builds a tree directly from lineages. Internal nodes are the named clades at which the supplied taxa diverge; clades with a single descendant are collapsed. Branch lengths place a clade at depth $h$ at height $1/(2h)$, so the tree is ultrametric and its patristic distances equal `distance_matrix()`. R returns an `ape`-compatible `phylo` object; Python and Julia return a `TaxodistTree` with Newick export.
+- `cross_distances(x, y)` computes the rectangular matrix between two sets of taxa.
+- `compare_bundles(old, new)` classifies every input as unchanged, added, removed, or changed in status, identifier, or lineage, and lists the pairwise distances that changed. Bundle files can be passed by path.
+- `taxo_resolve()` and `taxo_bundle()` gain `within`, which restricts candidates to those whose lineage contains a given clade.
+- `save_cache()` and `load_cache()` default to a persistent per-user cache file.
+
+### Performance and network handling
+
+- Distance matrices are computed from integer prefix identifiers: each node is mapped to an integer identifying its complete path from the root, so the MRCA depth of two taxa is the number of depths at which the identifiers agree.
+- Requests are retried with exponential backoff after network errors and server errors (5xx); the number of attempts is configurable.
+
+### Web application
+
+- The application uses the 0.9.0 packages, adds a between-groups tab and classification trees, reports names that were not found and the entry chosen for ambiguous names, offers CSV, PNG, Newick, and bundle downloads, and supports links that reopen a query.
+- Its bundled lineage cache was rebuilt; a cache produced by an earlier parser is no longer loaded.
+
+## taxodist 0.8.0
+
+::: {.release-dates}
+**Released** — R: 2026-09-24 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.8.0.tar.gz)) · Python: 2026-09-23 on [PyPI](https://pypi.org/project/taxodist/0.8.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
+:::
+
+### Auditable name resolution
+
+- Added `taxo_resolve()` for batch resolution with explicit `resolved`, `ambiguous`, `unresolved`, and `retrieval_error` statuses.
+- Preserved all candidate matches, selected identifiers, resolved names, lineage depths, and root-to-tip lineages for every input.
+- Added explicit ambiguity policies: warn and select the first candidate, select silently, or stop and require review.
+- Repeated names are retrieved only once while their original order and repetition remain in the audit table.
+- `distance_matrix()` accepts resolution objects directly and reuses stored lineages without further network requests.
+
+### Offline classifications
+
+- Added `taxo_from_lineages()` for curated, frozen, unpublished, or fully offline classifications.
+- Added deterministic custom identifiers and optional user-supplied identifiers.
+- Offline resolutions use the same distance, validation, and bundle APIs as live Taxonomicon resolutions.
+
+### Portable analysis bundles
+
+- Added `taxo_bundle()` to combine the resolution audit, labeled matrix, metric definition, software metadata, and source provenance.
+- Added `write_taxodist_bundle()` and `read_taxodist_bundle()` using a shared JSON schema across R, Python, and Julia.
+- Missing distances use JSON `null`; disconnected infinities use `"Infinity"` and `"-Infinity"`.
+- Bundle validation checks required fields, statuses, candidate counts, selected IDs, lineage depths, matrix labels, symmetry, and agreement between stored lineages and distances.
+
+### Robustness and compatibility
+
+- Preserved the continuous-prefix MRCA distance definition and established public workflows.
+- Improved retrieval-error reporting, structured lineage parsing, name-resolution caching, and source provenance.
+- Expanded deterministic regression tests to complete source coverage in all three implementations.
+
+## taxodist 0.7.0
+
+::: {.release-dates}
+**Released** — R: 2026-08-29 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.7.0.tar.gz)) · Python: 2026-08-28 on [PyPI](https://pypi.org/project/taxodist/0.7.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
+:::
+
+### Performance
+
+- R now fills the compact lower-triangular `dist` representation directly instead of allocating a full square intermediate matrix.
+- Python now reuses a persistent HTTP session across Taxonomicon requests, enabling connection pooling without changing public behavior.
+- All three implementations use streamlined numeric pairwise paths for matrix construction and reuse final name-resolved lineages during warm calls.
+
+### Compatibility and validation
+
+- Preserved the public API and continuous-prefix MRCA distance semantics.
+- Revalidated reference matrices, resolved identifiers, lineage outputs, and optimized matrix paths across R, Python, and Julia.
+- Julia now reads intermediate hierarchy nodes rendered as plain text and aligns ambiguous-name matching with the whole-word behavior used by R and Python.
+- Expanded deterministic and regression coverage; each implementation reports complete coverage under its language-specific coverage measure.
+- Improved cache inspection and clearing in the R implementation by addressing the private cache environment explicitly.
+
+## taxodist 0.6.0
+
+::: {.release-dates}
+**Released** — R: 2026-08-19 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.6.0.tar.gz)) · Python: 2026-08-07 on [PyPI](https://pypi.org/project/taxodist/0.6.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
+:::
+
+### Distance definition
+
+- Zero distance is now reserved for identical complete lineages.
+- Distinct ancestor–descendant nodes receive $1 / \operatorname{depth}(\operatorname{MRCA})$ rather than zero.
+- The measure is now described consistently as a **taxonomic hierarchy distance**, not a phylogenetic distance.
+- Within each connected hierarchy, the resulting distance is an ultrametric.
+
+::: {.callout-important title="Behavioral change"}
+Analyses that relied on version 0.5.0 or earlier should be recomputed when ancestor–descendant pairs are present. Use `is_member()` for clade containment and `taxo_path()` to inspect the route between hierarchy nodes.
+:::
+
+### Data and documentation
+
+- Standardized `taxobase` as a documented list with provenance metadata and offline matrices used by reproducible examples.
+- Aligned the R, Python, and Julia reference data, taxon ordering, distance definition, and principal API behavior.
+- Added explicit methodological documentation, limitations, and separate citations for the software and The Taxonomicon.
+- Revised statistical examples to distinguish taxonomic dendrograms from inferred phylogenetic trees.
+- Added the Julia implementation and registered distribution, with the same distance definition, principal API, labeled matrices, cache persistence, analysis helpers, and packaged `taxobase` reference data.
+
+### Robustness
+
+- MRCA detection now uses only the continuous common prefix of the two ordered lineages.
+- `is_member()` now uses exact, case-insensitive matching.
+- `taxo_path()` now handles identical nodes, ancestor–descendant pairs, full lineage depths, path direction, and lineages without a common ancestor.
+- Empty and single-taxon inputs are handled consistently across matrix, nearest-relative, focal-distance, clustering, ordination, and heatmap functions.
+- Clustering, ordination, and heatmap helpers detect missing and infinite distances before downstream analysis.
+- `taxo_ordinate()` validates and, when necessary, reduces the requested number of dimensions.
+- `load_cache()` validates names and value types before modifying the active cache.
+
+## taxodist 0.5.0
+
+::: {.release-dates}
+**Released** — R: 2026-06-02 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.5.0.tar.gz)) · Python: 2026-06-02 on [PyPI](https://pypi.org/project/taxodist/0.5.0/)
+:::
+
+### Reference data
+
+- Added `taxobase`, an offline reference object containing taxa, coverage information, lineages, search examples, pairwise results, and precomputed distance matrices.
+
+### Corrections
+
+- Prevented biological names containing the substring `planet`, such as *Periplaneta*, from being classified as astronomical entries.
+- Corrected lineage truncation when a genus page does not link directly back to the genus itself.
+- Added `Epifamily` to the rank-token filter.
+- Corrected parsing around superscript type markers and target names appearing in page-navigation text.
+
+## taxodist 0.4.0
+
+::: {.release-dates}
+**Released** — R: 2026-05-25 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.4.0.tar.gz)) · Python: 2026-05-25 on [PyPI](https://pypi.org/project/taxodist/0.4.0/)
+:::
+
+### New functions
+
+- Added `cache_info()` to report cached lineages, identifiers, and memory use.
+- Added `focal_distances()` to compare one focal taxon with every member of a community while reporting distance, MRCA, and MRCA depth.
+
+### Lineage parsing
+
+- Corrected handling of `Subphylum` and `Infraphylum` prefixes.
+- Improved removal of extinction markers, `auct.` annotations, author strings, ampersands, hyphenated names, and incomplete trailing citations.
+
+## taxodist 0.3.0
+
+::: {.release-dates}
+**Released** — R: 2026-05-06 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.3.0.tar.gz)) · Python: 2026-05-09 on [PyPI](https://pypi.org/project/taxodist/0.3.0/)
+:::
+
+### Name resolution and network handling
+
+- Added `taxo_search()` for inspecting Taxonomicon search results and numeric identifiers.
+- Added direct support for numeric Taxonomicon IDs in `get_lineage()` and downstream distance functions.
+- Added request timeouts and clearer handling of network failures and non-successful HTTP responses.
+- Added warnings for multiple valid biological entries, making homonym ambiguity explicit.
+
+### Lineage parsing
+
+- Expanded removal of rank labels and navigation artifacts.
+- Collapsed duplicated lineage nodes while preserving their original order.
+- Improved taxonomic redirect handling and removal of interface noise.
+- Restricted cleaned lineages to nodes beginning at `Biota` when available.
+- Added validation for non-numeric inputs to `get_lineage_by_id()`.
+- Corrected species-level lineages, quoted author names, and genus retention.
+
+## taxodist 0.2.0
+
+::: {.release-dates}
+**Released** — R: 2026-04-22 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.2.0.tar.gz))
+:::
+
+### New functions
+
+- Added `taxo_cluster()` for hierarchical clustering of taxonomic distances.
+- Added `taxo_ordinate()` for principal coordinates analysis (PCoA).
+- Added `save_cache()` and `load_cache()` for persistence across sessions.
+- Added `taxo_path()`, which represents the node-by-node route from taxon A through the MRCA to taxon B.
+
+### Documentation and integration
+
+- Added statistical examples using `vegan` for taxonomic distinctness, Mantel tests, and PERMANOVA.
+- Documented conversion of `taxo_cluster()` results to the `phylo` storage class with `ape::as.phylo()`.
+
+### Corrections
+
+- Prevented unnamed crown markers from being interpreted as common ancestry across unrelated lineages.
+- Expanded cleaning of rank prefixes such as cohort, magnorder, grandorder, parvorder, and legion.
+
+## taxodist 0.1.0 — Initial release
+
+::: {.release-dates}
+**Released** — R: 2026-03-23 ([CRAN archive](https://cran.r-project.org/src/contrib/Archive/taxodist/taxodist_0.1.0.tar.gz))
+:::
+
+- Introduced taxonomic distance calculations using lineage data from The Taxonomicon.
+- Added session-level lineage caching to reduce repeated network requests.
+- Initial functions: `taxo_distance()`, `mrca()`, `distance_matrix()`, `closest_relative()`, `compare_lineages()`, `shared_clades()`, `is_member()`, `filter_clade()`, `lineage_depth()`, `check_coverage()`, and `clear_cache()`.
+
+## Archive: earlier validation and performance notes
+
+These notes describe validation and benchmarks of earlier releases. They are kept for the record and do not describe version 1.0.0; for current cross-language guarantees, see [Cross-language compatibility](cross-language-compatibility.qmd).
+
+### Version 0.9.0 validation and performance
+
+#### Bundle interoperability
+
+Release 0.9.0 was checked with a common set of user-supplied lineages that included an ancestor–descendant pair, two inputs with identical lineages, and a lineage with a different root (infinite distances). Each implementation built a bundle with `taxo_from_lineages()` and `taxo_bundle()`, wrote it to JSON, and read the bundles written by the other two. In all six reader–writer combinations, `compare_bundles()` reported no changed taxa and no changed distances, and every matrix agreed with the R matrix to within $10^{-12}$.
+
+#### Matrix construction
+
+Matrices are now computed from integer identifiers of each node's complete path from the root. The table reports the time to build a matrix from lineages already in memory (no network access) for synthetic lineages of 31 nodes generated by random three-way branching, on a single Windows system. Each implementation is compared with its own 0.8.0 algorithm.
+
+| Taxa | R 0.8.0 | R 0.9.0 | Python 0.8.0 | Python 0.9.0 | Julia 0.8.0 | Julia 0.9.0 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 800 | 4.86 s | 0.27 s | 0.18 s | 0.09 s | 0.01 s | 0.01 s |
+| 2000 | — | 1.64 s | 1.20 s | 0.46 s | 0.12 s | 0.05 s |
+
+In R, the default progress bar of 0.8.0 updated once per pair and roughly tripled these times (14.3 s for 800 taxa); in 0.9.0 it updates once per column. These are single measurements on one system and one synthetic design; relative values are more informative than absolute ones, and the times of different languages should not be read as general language benchmarks.
+
+### Version 0.7.0 validation and performance
+
+Release 0.7.0 was revalidated with the same 52-taxon reference set in three order-rotated runs. Across languages, all 468 lineage audit records, resolved identifiers, finite-pair counts, and matrix checksums agreed.
+
+Cached timings below are medians across the three runs; each timing summarizes 15 adaptively calibrated batches on the validation system.
+
+| Cached operation, $n=52$ | R | Python | Julia |
+|---|---:|---:|---:|
+| Distance matrix | 9.250 ms | 4.358 ms | **0.369 ms** |
+| Clustering | 0.086 ms | 0.124 ms | **0.030 ms** |
+| Ordination | 0.633 ms | 0.675 ms | **0.398 ms** |
+
+At this size, Julia constructed the cached matrix 11.8 times faster than Python and 25.1 times faster than R. These values describe this implementation version, dataset, and validation system; they are not universal language benchmarks. Initial lineage retrieval was network-dominated and varied substantially between runs, so it should not be used to rank language performance.

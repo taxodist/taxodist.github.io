@@ -3,9 +3,16 @@ title: "Introduction to taxodist"
 subtitle: "Retrieve ordered taxonomic lineages and compare hierarchy nodes in R, Python, or Julia."
 ---
 
+```{r}
+#| include: false
+# Only offline R examples (curated lineages and taxobase) are executed on this
+# page; examples that query The Taxonomicon are shown without output.
+library(taxodist)
+```
+
 ## What is taxodist?
 
-`taxodist` compares taxa through their positions in a taxonomic classification. Given a scientific name or a Taxonomicon numeric ID, it retrieves the corresponding ordered lineage from [The Taxonomicon](http://taxonomicon.taxonomy.nl).
+`taxodist` compares taxa through their positions in a taxonomic classification. Given a scientific name or a Taxonomicon numeric ID, it retrieves the corresponding ordered lineage from [The Taxonomicon](http://taxonomicon.taxonomy.nl). Since version 1.1.0, lineages can also be retrieved from the Open Tree Taxonomy or the NCBI Taxonomy with the `source` argument of `taxo_resolve()` (see [Taxonomic sources](sources.qmd)).
 
 You can then use those lineages to:
 
@@ -14,6 +21,8 @@ You can then use those lineages to:
 - inspect the rank of every lineage node;
 - construct pairwise distance matrices for communities;
 - compute taxonomic diversity and distinctness indices;
+- compare samples with the taxonomic dissimilarities Γ+ and Θ+, and test community structure with NRI and NTI ([Community analyses](community-analyses.qmd));
+- measure how much distances depend on the classification by comparing sources;
 - inspect shared and divergent portions of lineages;
 - test or filter clade membership;
 - perform hierarchical clustering and principal coordinates analysis (PCoA);
@@ -51,7 +60,7 @@ Classification depth depends on the source and on which intermediate clades it r
 
 ## Installation
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -127,7 +136,7 @@ Pkg.add(url="https://github.com/rodrigosqrt3/Taxodist.jl")
 
 ## Retrieve a lineage
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -163,7 +172,7 @@ Names are matched after removing surrounding whitespace and collapsing repeated 
 
 You can also query a known numeric Taxonomicon ID directly:
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -192,7 +201,7 @@ get_lineage("50841")
 
 `lineage_ranks()` returns the same nodes together with the rank recorded by The Taxonomicon (for example `"Kingdom"`, `"Clade"`, `"Superfamily"`, or `"Genus"`) and their depth. Many nodes are unranked clades.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -218,7 +227,7 @@ lineage_ranks("Passer")
 
 ### Taxonomic distance
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -274,7 +283,7 @@ The `metric` argument of `taxo_distance()`, `distance_matrix()`, `cross_distance
 | `"wu_palmer"` | $1 - 2h/(d_A + d_B)$ | Normalizes for the uneven resolution of different groups |
 | `"ranked"` | Half the path through the standard Linnaean ranks | Step weights of Clarke and Warwick: 1 for congeneric, 2 for confamilial species, ... |
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -303,7 +312,7 @@ The result records the metric used, and so do distance matrices. See the [method
 
 ### Most recent common ancestor
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -335,7 +344,7 @@ mrca("Tyrannosaurus", "Homo")
 
 `shared_clades()` returns the common trunk from the root through the MRCA. `taxo_path()` returns the route from the first node to the MRCA and then to the second node.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -373,7 +382,7 @@ path
 
 Before analyzing a large set, inspect name coverage and resolve ambiguous or missing taxa. Each previously unseen taxon may require a network request; repeated retrievals use the session cache.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -445,7 +454,7 @@ Taxa that cannot be resolved remain represented in the result, with missing pair
 
 `focal_distances()` includes the MRCA and its depth for every comparison. `closest_relative()` provides the simpler taxon-and-distance view.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -495,7 +504,7 @@ closest_relative("Tyrannosaurus", community)
 
 When only the comparisons between two groups are needed, for example between the members of a community and a set of reference taxa, `cross_distances()` returns the rectangular matrix directly instead of the full square matrix of the combined set.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -532,7 +541,7 @@ Rows correspond to the first set and columns to the second. Resolutions and bund
 
 Clade matching is exact, case-insensitive, and ignores surrounding whitespace. A partial string such as `"Dino"` does not match `"Dinosauria"`.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -567,7 +576,7 @@ filter_clade(taxa, "Dinosauria")
 
 The analysis helpers accept taxon names or a previously computed distance object.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -623,7 +632,7 @@ The clustering dendrogram is a visualization of taxonomic hierarchy distances. I
 
 `taxo_tree()` represents the classification itself as a tree, without a clustering step. Internal nodes are the named clades at which the supplied taxa diverge, and clades with a single descendant are collapsed. Branch lengths are chosen so that patristic distances in the tree equal the values returned by `distance_matrix()`.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -664,11 +673,11 @@ Unlike a clustering dendrogram, the tree keeps polytomies where the classificati
 
 The example below uses curated lineages with ranks, so it runs offline.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
-```r
+```{r}
 standard <- c(NA, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
 lineages <- list(
   Panthera = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"),
@@ -749,11 +758,13 @@ taxo_distinctness_test(["Panthera", "Felis", "Canis"], d; n_iter=499, rng=Xoshir
 
 Δ+ and Λ+ use presence only and their expected values do not depend on sampling effort, so a sample can be compared with random samples of the same size drawn from a master list. The random draws differ between languages, so the simulated limits vary slightly. Results of `taxo_distinctness()` agree with `vegan::taxondive()`; see [Statistical Applications](statistical-applications.qmd#taxonomic-diversity-and-distinctness) for interpretation.
 
+To compare samples rather than describe each one, `taxo_dissimilarity()` computes the taxonomic dissimilarities Γ+ and Θ+ of Clarke et al. (2006), and `taxo_ses()` tests whether the taxa of a sample are more or less closely related than expected from a species pool (NRI and NTI of Webb et al. 2002). Both take the same samples and distance matrix as `taxo_distinctness()`; see [Community analyses](community-analyses.qmd).
+
 ## Coverage, search, and homonyms
 
 Use `check_coverage()` before a large calculation to identify names that cannot be resolved. Use `taxo_search()` to inspect possible Taxonomicon matches when a name is ambiguous or unexpected.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -783,7 +794,7 @@ get_taxonomicon_id("Tyrannosaurus")
 
 `taxonomicon_available()` checks quickly whether the server can be reached, which is useful before a long batch or in scripts and examples that should be skipped when there is no connection.
 
-When a name has several biological entries, entries marked as invalid, rejected, nude, or illegitimate names (`nom. inval.`, `nom. rej.`, `nom. nud.`, `nom. illeg.`) are considered only after the others.
+When a name has several biological entries, entries marked as invalid, rejected, nude, or illegitimate names (`nom. inval.`, `nom. rej.`, `nom. nud.`, `nom. illeg.`) are considered only after the others. Since version 1.1.0, a candidate nested in another candidate of the same name, such as the nominotypical subgenus *Mus (Mus)* inside the genus *Mus*, is not counted as a homonym, so `"Mus"` resolves without ambiguity.
 
 When reproducibility matters, record the resolved numeric ID and the retrieval date. This helps distinguish homonyms and documents which external classification was queried.
 
@@ -795,7 +806,7 @@ When reproducibility matters, record the resolved numeric ID and the retrieval d
 
 Each row retains the original input, selected name and identifier, status, candidate count, lineage depth, lineage, and candidate table. Status is one of `resolved`, `ambiguous`, `unresolved`, or `retrieval_error`.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -842,7 +853,7 @@ The ambiguity policy can warn and select the first valid candidate (`"warn"`), s
 
 Homonyms in different parts of the classification can often be resolved automatically with `within`, which keeps only candidates whose lineage contains the given clade. Names without such a candidate are reported as `unresolved`.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -866,6 +877,37 @@ taxo_resolve(["Nereis", "Tyrannosaurus"]; within="Animalia")
 
 Each stored lineage is truncated at the queried taxon exactly as in `get_lineage()`, so a matrix computed from a resolution equals the matrix computed from the same names.
 
+### Other taxonomic sources
+
+`source = "ott"` retrieves lineages from the Open Tree of Life reference taxonomy and `source = "ncbi"` from the NCBI Taxonomy. Identifiers then carry a prefix (`"ott:770309"`, `"ncbi:9606"`), the resolution records its source, and clade names for `within` follow the source (animals are `"Metazoa"` there). `compare_sources()` measures how much the distances among the same taxa differ between sources.
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+ncbi <- taxo_resolve(c("Homo", "Pan", "Gorilla"), source = "ncbi")
+distance_matrix(ncbi)
+```
+
+### Python
+
+```python
+ncbi = td.taxo_resolve(["Homo", "Pan", "Gorilla"], source="ncbi")
+td.distance_matrix(ncbi)
+```
+
+### Julia
+
+```julia
+ncbi = taxo_resolve(["Homo", "Pan", "Gorilla"]; source="ncbi")
+distance_matrix(ncbi)
+```
+
+:::
+
+See [Taxonomic sources](sources.qmd) for request limits, the NCBI API key, and how to interpret `compare_sources()`.
+
 ::: {.callout-tip title="Why resolve first?"}
 The resolution object separates absent names from retrieval failures, makes homonym choices inspectable, and reuses stored lineages in downstream matrix construction.
 :::
@@ -874,11 +916,11 @@ The resolution object separates absent names from retrieval failures, makes homo
 
 `taxo_from_lineages()` creates the same auditable object without contacting an online service. This is useful for frozen classifications, unpublished taxonomies, manually reviewed lineages, and reproducible teaching examples.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
-```r
+```{r}
 local <- taxo_from_lineages(
   list(
     Alpha = c("Biota", "Animalia", "Alpha"),
@@ -928,7 +970,7 @@ An optional `ranks` argument supplies the rank of every node (missing for unrank
 
 A bundle preserves the resolution audit, matrix, metric definition, software metadata, and source provenance together. The JSON schema is shared by the R, Python, and Julia implementations.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -967,7 +1009,7 @@ Unlike cache files, bundle files are designed for cross-language exchange. Missi
 
 Live classifications change. When an analysis is repeated, `compare_bundles()` reports which inputs changed status, identifier, or lineage, which were added or removed, and which pairwise distances changed as a consequence. Bundle files can be passed by path.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 #### R
 
@@ -999,7 +1041,7 @@ compare_bundles(before, after)
 
 Retrieved identifiers and lineages are cached in memory. Saving the cache avoids repeating those network requests in a later session.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -1047,11 +1089,11 @@ Consecutive requests are spaced by at least 0.25 seconds so that large batches d
 
 The packaged `taxobase` object provides a fixed, offline dataset for examples, tests, and comparisons that must not depend on the availability or current state of The Taxonomicon.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
-```r
+```{r}
 data(taxobase, package = "taxodist")
 names(taxobase)
 taxobase$metadata
@@ -1079,10 +1121,10 @@ The three packages distribute equivalent reference content, including component 
 
 ## Data source and citation
 
-All live lineage data originate from The Taxonomicon, based on *Systema Naturae 2000*:
+By default, live lineage data originate from The Taxonomicon, based on *Systema Naturae 2000*:
 
 > Brands, S.J. (1989 onwards). *Systema Naturae 2000*. Amsterdam, The Netherlands. Retrieved from The Taxonomicon, <http://taxonomicon.taxonomy.nl>.
 
-Published analyses should cite both the `taxodist` software and the underlying classification source.
+Published analyses should cite both the `taxodist` software and the classification source of their lineages; the citations of the Open Tree Taxonomy and the NCBI Taxonomy are listed on the [About](about.qmd#citation) page and returned by `taxo_sources()`.
 
 [Read the Methodology →](methodology.qmd){.btn .btn-outline-secondary role="button"} [Continue to Statistical Applications →](statistical-applications.qmd){.btn .btn-outline-primary role="button"}

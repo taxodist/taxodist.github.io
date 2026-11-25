@@ -1,0 +1,112 @@
+{
+  "format": "taxodist_bundle",
+  "schema_version": "1.1",
+  "created_at": "2026-11-24 12:03:08 UTC",
+  "source": {
+    "name": "user-supplied",
+    "url": null,
+    "retrieved_at": "2026-11-24 12:03:08 UTC"
+  },
+  "software": {
+    "name": "taxodist",
+    "version": "1.0.0",
+    "language": "R"
+  },
+  "metric": {
+    "name": "inverse_mrca_depth",
+    "definition": "0 for identical lineages; otherwise 1 / depth(MRCA)",
+    "root_depth": 1,
+    "common_ancestor": "continuous common lineage prefix"
+  },
+  "taxa": [
+    {
+      "input": "Tyrannosaurus",
+      "resolved_name": "Tyrannosaurus",
+      "id": "custom:Tyrannosaurus",
+      "status": "resolved",
+      "n_candidates": 1,
+      "lineage_depth": 6,
+      "lineage": ["Biota", "Animalia", "Chordata", "Dinosauria", "Theropoda", "Tyrannosaurus"],
+      "candidates": [
+        {
+          "id": "custom:Tyrannosaurus",
+          "name": "Tyrannosaurus"
+        }
+      ],
+      "lineage_ranks": [
+        null,
+        "Kingdom",
+        "Phylum",
+        null,
+        null,
+        "Genus"
+      ]
+    },
+    {
+      "input": "Velociraptor",
+      "resolved_name": "Velociraptor",
+      "id": "custom:Velociraptor",
+      "status": "resolved",
+      "n_candidates": 1,
+      "lineage_depth": 6,
+      "lineage": ["Biota", "Animalia", "Chordata", "Dinosauria", "Theropoda", "Velociraptor"],
+      "candidates": [
+        {
+          "id": "custom:Velociraptor",
+          "name": "Velociraptor"
+        }
+      ],
+      "lineage_ranks": [
+        null,
+        "Kingdom",
+        "Phylum",
+        null,
+        null,
+        "Genus"
+      ]
+    },
+    {
+      "input": "Homo",
+      "resolved_name": "Homo",
+      "id": "custom:Homo",
+      "status": "resolved",
+      "n_candidates": 1,
+      "lineage_depth": 6,
+      "lineage": ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Homo"],
+      "candidates": [
+        {
+          "id": "custom:Homo",
+          "name": "Homo"
+        }
+      ],
+      "lineage_ranks": [
+        null,
+        "Kingdom",
+        "Phylum",
+        "Class",
+        "Order",
+        "Genus"
+      ]
+    }
+  ],
+  "matrix": {
+    "labels": ["Tyrannosaurus", "Velociraptor", "Homo"],
+    "values": [
+      [
+        0,
+        0.2,
+        0.333333333333333
+      ],
+      [
+        0.2,
+        0,
+        0.333333333333333
+      ],
+      [
+        0.333333333333333,
+        0.333333333333333,
+        0
+      ]
+    ]
+  }
+}

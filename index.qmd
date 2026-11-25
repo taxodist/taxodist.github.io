@@ -4,25 +4,19 @@ toc: false
 ---
 
 ::: {.homepage-header}
-::: {.grid .align-items-center}
-::: {.g-col-12 .g-col-md-9}
+<img src="images/taxodist_sepia.png" class="homepage-logo" alt="taxodist logo">
+
 # taxodist
 
 **Taxonomic hierarchy distances and lineage analysis in R, Python, and Julia**
 
-`taxodist` retrieves ordered taxonomic lineages and the ranks of their nodes, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix. Path-length, Wu–Palmer, and rank-based distances and the taxonomic distinctness indices of Clarke and Warwick are also available.
+`taxodist` retrieves ordered taxonomic lineages and the ranks of their nodes from The Taxonomicon, the Open Tree Taxonomy, or the NCBI Taxonomy, documents name-resolution decisions, and computes distances from the depth of the most recent common ancestor in the continuous shared lineage prefix. Path-length, Wu–Palmer, and rank-based distances and the taxonomic distinctness indices of Clarke and Warwick are also available.
 
-[Introduction and usage](getting-started.qmd) · [Methodology](methodology.qmd) · [Function reference](reference.qmd) · [Web application](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/)
-:::
-
-::: {.g-col-12 .g-col-md-3 .text-center}
-![](images/taxodist_sepia.png){.homepage-logo width="160" fig-alt="taxodist logo"}
-:::
-:::
+[Introduction and usage](getting-started.qmd) · [Methodology](methodology.qmd) · [Function reference](reference.qmd) · [Web application](app.qmd)
 :::
 
 ::: {.release-meta}
-**Current coordinated release: 1.0.0** (R, Python, and Julia) — first stable release
+**Current coordinated release: 1.1.0** (R, Python, and Julia) — taxonomic sources and community analyses
 
 [![CRAN status](https://img.shields.io/cran/v/taxodist?color=2f855a)](https://cran.r-project.org/package=taxodist) [![PyPI version](https://img.shields.io/pypi/v/taxodist?color=2f855a)](https://pypi.org/project/taxodist) [![Julia version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Frodrigosqrt3%2FTaxodist.jl%2Fmain%2FProject.toml&query=%24.version&prefix=v&label=julia&color=2f855a)](https://platform.juliahub.com/ui/Packages/General/Taxodist/)
 :::
@@ -47,6 +41,16 @@ These values describe separation within a recorded classification. They are **no
 
 [Detailed definition and assumptions](methodology.qmd)
 
+## Version 1.1.0
+
+Version 1.1.0, for R, Python, and Julia, adds taxonomic sources and community analyses. The distance metrics and the bundle format are unchanged, and distances computed from The Taxonomicon are identical to version 1.0.0 (except for the rare pages without a structured hierarchy).
+
+- **Three taxonomic sources.** `taxo_resolve()` and `taxo_bundle()` gain a `source` argument: besides The Taxonomicon (default), lineages can come from the Open Tree of Life reference taxonomy (`"ott"`) and the NCBI Taxonomy (`"ncbi"`). Identifiers carry a source prefix, and resolutions and bundles record the source and its version. `taxo_sources()` lists the sources with their citations. [Taxonomic sources](sources.qmd)
+- **How much does the classification matter?** `compare_sources()` resolves the same taxa in several sources and reports the agreement between their distance matrices (Spearman correlation and Mantel test).
+- **Community analyses.** `taxo_dissimilarity()` computes the taxonomic dissimilarities Γ+ and Θ+ between samples (Clarke et al. 2006), and `taxo_ses()` the standardized effect sizes NRI and NTI (Webb et al. 2002). [Community analyses](community-analyses.qmd)
+- **Homonyms.** A nominotypical subgenus such as *Mus (Mus)* is no longer counted as a homonym of its genus, so names such as `"Mus"` resolve without ambiguity.
+- **Faster matrices.** Common-ancestor depths are computed from a sorted index of the lineages; results are identical and large matrices are several times faster.
+
 ## Version 1.0.0
 
 Version 1.0.0 is the first stable release, published simultaneously for R, Python, and Julia. The default distance, the alternative metrics, and the bundle format (schema 1.1) are now stable: later 1.x releases keep their definitions and continue to read bundles written by this version.
@@ -62,7 +66,7 @@ See the [changelog](news.qmd) for the complete list, including breaking changes.
 
 ## One workflow, three languages
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -126,11 +130,13 @@ write_taxodist_bundle(bundle, "analysis.taxodist.json")
 | Compare hierarchy nodes | `taxo_distance()`, `mrca()`, `shared_clades()`, `taxo_path()` |
 | Build community distances (four metrics) | `distance_matrix()`, `cross_distances()`, `focal_distances()`, `closest_relative()` |
 | Measure taxonomic diversity | `taxo_distinctness()`, `taxo_distinctness_test()` |
+| Compare communities and test their structure | `taxo_dissimilarity()`, `taxo_ses()` |
+| Choose and compare classifications | `taxo_resolve(source = ...)`, `taxo_sources()`, `compare_sources()` |
 | Represent the hierarchy as a tree | `taxo_tree()` |
 | Test membership | `is_member()`, `filter_clade()` |
 | Analyze and visualize | `taxo_cluster()`, `taxo_ordinate()`, `taxo_heatmap()` |
 | Preserve and compare analyses | `taxo_bundle()`, `write_taxodist_bundle()`, `read_taxodist_bundle()`, `compare_bundles()` |
-| Work reproducibly offline | `taxo_from_lineages()`, `load_taxobase()` |
+| Work reproducibly offline | `taxo_from_lineages()`; bundled reference data via `data(taxobase)` in R and `load_taxobase()` in Python and Julia |
 
 ## Software interfaces
 
@@ -139,11 +145,11 @@ write_taxodist_bundle(bundle, "analysis.taxodist.json")
 | R | [CRAN](https://cran.r-project.org/package=taxodist) · [source](https://github.com/rodrigosqrt3/taxodist) | Base R `dist`, `taxodist_resolution`, and `taxodist_bundle` objects |
 | Python | [PyPI](https://pypi.org/project/taxodist/) · [source](https://github.com/rodrigosqrt3/taxodist-py) | Labeled `pandas` objects, `TaxodistResolution`, and `TaxodistBundle` |
 | Julia | [JuliaHub](https://platform.juliahub.com/ui/Packages/General/Taxodist/) · [source](https://github.com/rodrigosqrt3/Taxodist.jl) | `TaxonomicDistanceMatrix`, `TaxodistResolution`, and `TaxodistBundle` |
-| Web application | [Interactive interface](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/) | Browser-based lineage, distance, and classification-tree exploration in five languages, with downloadable results |
+| Web application | [Interactive interface](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/) · [overview](app.qmd) | Browser-based lineage, distance, and classification-tree exploration in five languages, with downloadable results |
 
 ## Data source and citation
 
-Live lineages originate from **The Taxonomicon**, based on *Systema Naturae 2000*. Empirical work should record the package version, implementation, retrieval date, selected numeric identifiers, unresolved taxa, and lineage source.
+By default, live lineages originate from **The Taxonomicon**, based on *Systema Naturae 2000*; the **Open Tree Taxonomy** and the **NCBI Taxonomy** are available with `source = "ott"` and `source = "ncbi"`. Empirical work should record the package version, implementation, retrieval date, selected identifiers, unresolved taxa, and lineage source, and cite that source ([citations](about.qmd#citation)).
 
 > Brands, S.J. (1989 onwards). *Systema Naturae 2000*. Amsterdam, The Netherlands. Retrieved from The Taxonomicon, <http://taxonomicon.taxonomy.nl>.
 

@@ -9,7 +9,7 @@ subtitle: "Project scope, authorship, citation, and licensing."
 
 The project addresses a practical need: a reproducible way to resolve taxon names, inspect their lineages, identify their most recent common ancestor, and construct labeled distance objects for downstream analysis.
 
-The current implementation uses lineage data from [The Taxonomicon](http://taxonomicon.taxonomy.nl), based on *Systema Naturae 2000*. The external source remains responsible for the underlying classification; `taxodist` retrieves, cleans, organizes, and compares those records.
+By default, lineages come from [The Taxonomicon](http://taxonomicon.taxonomy.nl), based on *Systema Naturae 2000*. Since version 1.1.0, they can also be retrieved from the [Open Tree of Life reference taxonomy](https://tree.opentreeoflife.org/about/taxonomy-version) and the [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) (see [Taxonomic sources](sources.qmd)). The external sources remain responsible for the underlying classifications; `taxodist` retrieves, cleans, organizes, and compares those records.
 
 ## Methodological position
 
@@ -17,7 +17,7 @@ By default, the distance between distinct hierarchy nodes is the reciprocal of M
 
 These values measure classification depth. They do not estimate evolutionary time, genetic or morphological divergence, phylogenetic branch length, or statistical support for ancestry. The interpretation of every analysis is conditional on the source classification and the intermediate nodes it records.
 
-Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 added auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations. Version 0.9.0 corrected retrieval and caching errors and added classification trees, distances between two sets of taxa, and the comparison of repeated analyses. Version 1.0.0, the first stable release, replaced the text-based lineage parser with one that reads the structure of each Taxonomicon page, retained the rank of every node, added alternative distance metrics and the taxonomic distinctness indices of Clarke and Warwick, and froze the metric definitions and the bundle format for the 1.x series.
+Version 0.6.0 formalized this distinction across the R package, Python package, application, reference data, and documentation. Version 0.7.0 optimized cached matrix construction. Version 0.8.0 added auditable resolution records, offline user-supplied classifications, and portable analysis bundles shared by all three implementations. Version 0.9.0 corrected retrieval and caching errors and added classification trees, distances between two sets of taxa, and the comparison of repeated analyses. Version 1.0.0, the first stable release, replaced the text-based lineage parser with one that reads the structure of each Taxonomicon page, retained the rank of every node, added alternative distance metrics and the taxonomic distinctness indices of Clarke and Warwick, and froze the metric definitions and the bundle format for the 1.x series. Version 1.1.0 added the Open Tree and NCBI taxonomies as alternative lineage sources, the comparison of analyses across sources, and community analyses: the taxonomic dissimilarities of Clarke, Somerfield and Chapman between samples and the NRI and NTI effect sizes of Webb et al.
 
 ## Project history
 
@@ -33,7 +33,8 @@ Live taxonomic databases change. Analyses using retrieved lineages should theref
 
 - the `taxodist` version and implementation;
 - the retrieval date;
-- numeric Taxonomicon IDs, particularly for homonyms;
+- the lineage source (and, for the Open Tree Taxonomy, its version, which resolutions and bundles record);
+- the selected identifiers (numeric Taxonomicon IDs or prefixed Open Tree and NCBI IDs), particularly for homonyms;
 - unresolved or excluded taxa;
 - whether live data or the packaged `taxobase` reference object was used;
 - the distance metric and downstream analysis settings.
@@ -44,7 +45,7 @@ The fixed `taxobase` object is distributed for examples, tests, and comparisons 
 
 The R, Python, and Julia implementations are parts of the same software project and may be cited with a common project-level reference:
 
-> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version 1.0.0). Open-source software. <https://taxodist.github.io/>.
+> Villa, R. F. (2026). *taxodist: Taxonomic Hierarchy Distances and Lineage Analysis* (version {{< var version >}}). Open-source software. <https://taxodist.github.io/>.
 
 In the methods section, identify the implementation used:
 
@@ -58,15 +59,67 @@ The R command below returns the citation metadata distributed with the package:
 citation("taxodist")
 ```
 
+### BibTeX
+
+The entries below are those returned by `toBibtex(citation("taxodist"))` for version 1.1.0, with citation keys added. Cite the first entry together with the source of your lineages: The Taxonomicon by default, the Open Tree Taxonomy or the NCBI Taxonomy when `source = "ott"` or `"ncbi"`. Use the copy button to paste them into a `.bib` file.
+
+```bibtex
+@Manual{taxodist,
+  title = {taxodist: Taxonomic Hierarchy Distances and Lineage Analysis},
+  author = {Rodrigo Fonseca Villa},
+  year = {2026},
+  note = {R package version 1.1.0},
+  url = {https://CRAN.R-project.org/package=taxodist},
+}
+
+@Misc{taxonomicon,
+  title = {The Taxonomicon: Systema Naturae 2000},
+  author = {Sheila J. Brands},
+  year = {1989},
+  note = {Continuously updated taxonomic database},
+  url = {http://taxonomicon.taxonomy.nl},
+}
+
+@Article{rees2017,
+  title = {Automated assembly of a reference taxonomy for phylogenetic data synthesis},
+  author = {Jonathan A. Rees and Karen Cranston},
+  journal = {Biodiversity Data Journal},
+  year = {2017},
+  volume = {5},
+  pages = {e12581},
+  doi = {10.3897/BDJ.5.e12581},
+}
+
+@Article{schoch2020,
+  title = {NCBI Taxonomy: a comprehensive update on curation, resources and tools},
+  author = {Conrad L. Schoch and others},
+  journal = {Database},
+  year = {2020},
+  volume = {2020},
+  pages = {baaa062},
+  doi = {10.1093/database/baaa062},
+}
+```
+
 The source repositories also provide language-specific citation and release metadata.
 
-### Classification source
+### Classification sources
 
-Published analyses based on live or packaged Taxonomicon lineages should also cite the underlying source:
+Published analyses should also cite the classification their lineages come from (`taxo_sources()` lists the citations, and every resolution and bundle records its source).
+
+The Taxonomicon (`source = "taxonomicon"`, the default; also the source of the packaged `taxobase` lineages):
 
 > Brands, S.J. (1989 onwards). *Systema Naturae 2000*. Amsterdam, The Netherlands. Retrieved from The Taxonomicon, <http://taxonomicon.taxonomy.nl>.
 
-The software citation acknowledges the implementation; the Taxonomicon citation acknowledges the classification data. Neither should replace the other.
+The Open Tree Taxonomy (`source = "ott"`); also report the taxonomy version recorded in the resolution or bundle:
+
+> Rees, J.A. & Cranston, K. (2017). Automated assembly of a reference taxonomy for phylogenetic data synthesis. *Biodiversity Data Journal* 5, e12581. <https://doi.org/10.3897/BDJ.5.e12581>
+
+The NCBI Taxonomy (`source = "ncbi"`):
+
+> Schoch, C.L. et al. (2020). NCBI Taxonomy: a comprehensive update on curation, resources and tools. *Database* 2020, baaa062. <https://doi.org/10.1093/database/baaa062>
+
+The software citation acknowledges the implementation; the source citation acknowledges the classification data. Neither should replace the other.
 
 ## Authorship and contact
 

@@ -268,6 +268,7 @@ th code {
 
 /* ── Homepage header ─────────────────────────────────────────── */
 .homepage-header {
+  display: flow-root; /* contains the floated logo */
   margin: 0.5rem 0 1.2rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--rule);
@@ -299,11 +300,18 @@ th code {
 }
 
 /* ── Theme-sensitive homepage logo ───────────────────────────── */
+/* Floated beside the title, so the text wraps around it at every width
+   instead of the logo dropping below the text on small screens. */
 .homepage-logo {
-  display: block;
-  max-width: 160px;
+  float: right;
+  width: 160px;
   height: auto;
-  margin: 0 auto;
+  margin: 0 0 0.75rem 1.5rem;
+}
+
+/* Pandoc wraps the logo in a paragraph; keep it from adding space. */
+.homepage-header p:has(> .homepage-logo) {
+  margin: 0;
 }
 
 .quarto-light .homepage-logo {
@@ -321,8 +329,8 @@ th code {
   }
 
   .homepage-logo {
-    max-width: 125px;
-    margin-top: 0.5rem;
+    width: 84px;
+    margin: 0 0 0.5rem 1rem;
   }
 
   h1 {
@@ -343,4 +351,10 @@ th code {
   .panel-tabset .nav-tabs {
     flex-wrap: wrap;
   }
+}
+/* -- Release dates in the changelog ---------------------------------- */
+.release-dates {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: -0.25rem 0 1rem;
 }

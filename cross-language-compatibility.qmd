@@ -5,7 +5,7 @@ subtitle: "Shared semantics, native return types, and reproducible workflows in 
 
 ## Compatibility contract
 
-The R, Python, and Julia packages are separate implementations of the same taxonomic hierarchy distance. Version 1.0.0, the first stable release, is published simultaneously in all three, and their shared behavioral contract states that:
+The R, Python, and Julia packages are separate implementations of the same taxonomic hierarchy distance. Version 1.0.0, the first stable release, was published simultaneously in all three, as is version 1.1.0, and their shared behavioral contract states that:
 
 - lineages and node ranks are read by the same structured parser, checked against the same trimmed copies of real Taxonomicon pages and their expected lineages;
 - ordered lineages are compared through their continuous common prefix;
@@ -22,13 +22,16 @@ The R, Python, and Julia packages are separate implementations of the same taxon
 - coverage checks distinguish found, absent, and unknown (server unreachable);
 - portable bundles use the same schema version 1.1 and matrix encoding, and all three still read schema 1.0;
 - classification trees use the same topology rules and branch lengths, so their patristic distances equal the distance matrix in every implementation;
-- taxonomic diversity and distinctness indices are computed from the same formulas and agree with `vegan::taxondive()`.
+- taxonomic diversity and distinctness indices are computed from the same formulas and agree with `vegan::taxondive()`;
+- resolutions from the Open Tree and NCBI taxonomies are built by the same rules (candidate selection, homonym handling, identifier prefixes, lineages, and ranks), checked against shared fixtures of real API responses;
+- the taxonomic dissimilarities Γ+ and Θ+ and the observed MPD and MNTD of `taxo_ses()` are computed from the same formulas and checked against a shared fixture;
+- deterministic results are identical in the three languages, while results that depend on random draws (null models and permutation tests) are reproducible within one language but differ slightly between languages.
 
 Compatibility means equivalent scientific semantics and labeled results. It does not mean that every object has the same internal representation or printed appearance.
 
 ## Equivalent basic workflow
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -117,6 +120,8 @@ For lineages retrieved from the same Taxonomicon record and processed under the 
 | Check availability | `check_coverage()`, `lineage_depth()` |
 | Analyze a matrix | `taxo_cluster()`, `taxo_ordinate()`, `taxo_heatmap()` |
 | Taxonomic diversity and distinctness | `taxo_distinctness()`, `taxo_distinctness_test()` |
+| Compare communities | `taxo_dissimilarity()`, `taxo_ses()` |
+| Choose and compare taxonomic sources | `taxo_resolve(source = ...)`, `taxo_sources()`, `compare_sources()` |
 | Manage the cache | `cache_info()`, `save_cache()`, `load_cache()`, `clear_cache()` |
 | Preserve or exchange an analysis | `taxo_bundle()`, `write_taxodist_bundle()`, `read_taxodist_bundle()` |
 | Compare two analyses | `compare_bundles()` |
@@ -131,10 +136,11 @@ Argument names and defaults are matched where language conventions permit. All t
 | Attempts per request (default 3) | `options(taxodist.max_tries = n)` | `taxodist.fetch.MAX_TRIES` | `Taxodist.MAX_TRIES[]` |
 | Interval between requests (default 0.25 s) | `options(taxodist.min_interval = s)` | `taxodist.fetch.MIN_INTERVAL` | `Taxodist.MIN_INTERVAL[]` |
 | Rank levels of `"ranked"` | `options(taxodist.rank_levels = ...)` | `taxodist.distance.RANK_LEVELS` | `Taxodist.RANK_LEVELS[]` |
-| Random numbers in `taxo_distinctness_test()` | `set.seed()` | `seed=` argument | `rng=` argument |
+| NCBI API key | `options(taxodist.ncbi_api_key = ...)` or `NCBI_API_KEY` | `taxodist.sources.NCBI_API_KEY` or `NCBI_API_KEY` | `Taxodist.NCBI_API_KEY[]` or `NCBI_API_KEY` |
+| Random numbers in `taxo_distinctness_test()`, `taxo_ses()`, and `compare_sources()` | `set.seed()` | `seed=` argument | `rng=` argument |
 | Plotting | Base graphics | `pip install "taxodist[plot]"` (matplotlib, seaborn) | `using Plots` (package extension) |
 
-Random draws are not identical between languages, so the simulated limits and $p$-values of `taxo_distinctness_test()` differ slightly; the observed and expected $\Delta^+$ do not.
+Random draws are not identical between languages, so results that depend on them differ slightly: the simulated limits and $p$-values of `taxo_distinctness_test()`, the null means, standard deviations, effect sizes (NRI, NTI), and $p$-values of `taxo_ses()`, and the Mantel $p$-values of `compare_sources()`. Deterministic results are identical: the observed and expected $\Delta^+$, the dissimilarities of `taxo_dissimilarity()`, the observed MPD and MNTD, and the depths and Spearman correlations of `compare_sources()`.
 
 ## Native object differences
 
@@ -146,8 +152,11 @@ Random draws are not identical between languages, so the simulated limits and $p
 | Resolution audit | `taxodist_resolution` data frame | `TaxodistResolution` | `TaxodistResolution` with a `DataFrame` |
 | Portable bundle | `taxodist_bundle` list | `TaxodistBundle` | `TaxodistBundle` |
 | Distance matrix | Base R `dist` (metric in attribute `"method"`) | Labeled `pandas.DataFrame` (metric in `attrs["metric"]`) | `TaxonomicDistanceMatrix` (metric in field `metric`) |
-| Distinctness indices | `taxodist_distinctness` data frame | `pandas.DataFrame` | Named tuple `(metric, data)` |
+| Distinctness indices | `taxodist_distinctness` data frame | `pandas.DataFrame` | `TaxodistDistinctness` (named tuple `(metric, data)` before 1.1.0) |
 | Distinctness test | `taxodist_distinctness_test` list | `TaxodistDistinctnessTest` | Named tuple |
+| Dissimilarity between samples | `dist` (attributes `method`, `metric`) | Labeled `pandas.DataFrame` (`attrs["method"]`, `attrs["metric"]`) | `TaxonomicDistanceMatrix` (fields `method`, `metric`) |
+| Effect sizes (NRI, NTI) | `taxodist_ses` data frame | `pandas.DataFrame` (settings in `attrs`) | `TaxodistSES` |
+| Source comparison | `taxodist_source_comparison` list | `TaxodistSourceComparison` | `TaxodistSourceComparison` |
 | Distances between two sets | Numeric matrix with dimnames | Labeled `pandas.DataFrame` | `TaxonomicCrossDistances` |
 | Classification tree | `ape`-compatible `phylo` | `TaxodistTree` | `TaxodistTree` |
 | Bundle comparison | `taxodist_bundle_comparison` list | `TaxodistBundleComparison` | `TaxodistBundleComparison` |
@@ -175,7 +184,7 @@ All three implementations assign the same four resolution statuses:
 
 Resolution rows share the fields `input`, `resolved_name`, `id`, `status`, `n_candidates`, `lineage_depth`, `lineage`, `ranks`, and `candidates`. `distance_matrix()` consumes these objects directly and reuses stored lineages without new requests.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -275,7 +284,7 @@ The analysis results are semantically aligned but use different numerical ecosys
 
 ### Clustering
 
-R delegates to `stats::hclust()`, Python to SciPy, and Julia to `Clustering.jl`. With the same complete finite matrix and equivalent method, all three summarize the same dissimilarities, although internal merge representations and plotting defaults differ.
+R delegates to `stats::hclust()`. Since version 1.1.0, Python and Julia use ports of the Fortran routines of `stats::hclust()`, so merges, heights, and leaf order equal R's for every method, also when distances are tied. The results are still returned in each ecosystem's structure: a SciPy linkage matrix in Python (alongside R's `merge`, `height`, and `order`) and a `Clustering.Hclust` in Julia; plotting defaults differ.
 
 ### Ordination
 
@@ -302,7 +311,7 @@ Typography, plotting backends, colors, dendrogram orientation, and console forma
 
 The three packages distribute equivalent `taxobase` content. Python and Julia load the neutral JSON reference into their native labeled containers.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -399,6 +408,13 @@ from_julia = load_taxobase().statistical_matrix
 
 This checks labels, order, and numerical values without depending on language-specific serialization.
 
+## Version 1.1.0 validation
+
+- **Sources.** Shared fixtures of real Open Tree of Life and NCBI API responses, with the expected resolutions generated by R, check the resolutions of both sources in the three implementations (`tests/testthat/fixtures/sources` in R, `tests/fixtures/sources` in Python, `test/fixtures/sources` in Julia).
+- **Community analyses.** A shared fixture generated by R (`expected_community.json`) checks $\Gamma^+$, $\Theta^+$, MPD, and MNTD in Python and Julia. On a flat classification the dissimilarities reduce to the Sørensen and Kulczynski dissimilarities, which the R tests verify against `vegan::vegdist()`. The null distributions of `taxo_ses()` and the Mantel permutations of `compare_sources()` use each language's random number generator and are not compared across languages.
+- **Text fallback parser.** A shared fixture (`expected_text_fallback.json`) checks that the plain-text fallback parser gives the same raw lineages and ranks in the three implementations.
+- **Clustering.** The Python and Julia ports of `stats::hclust()` reproduce R's merges, heights, and leaf order, including tied distances.
+
 ## Version 1.0.0 validation
 
 - **Parser.** The three implementations share trimmed copies of real Taxonomicon pages and a file of expected lineages, and each test suite checks its structured parser against them. The text fallback parser of Julia is also checked against output generated with R.
@@ -407,36 +423,7 @@ This checks labels, order, and numerical values without depending on language-sp
 - **Reference data.** `taxobase` was rebuilt in R with the new parser and exported to the neutral JSON file loaded by Python and Julia.
 - **Coverage.** Each implementation reports complete line coverage under its language-specific coverage measure.
 
-## Version 0.9.0 validation and performance
-
-### Bundle interoperability
-
-Release 0.9.0 was checked with a common set of user-supplied lineages that included an ancestor–descendant pair, two inputs with identical lineages, and a lineage with a different root (infinite distances). Each implementation built a bundle with `taxo_from_lineages()` and `taxo_bundle()`, wrote it to JSON, and read the bundles written by the other two. In all six reader–writer combinations, `compare_bundles()` reported no changed taxa and no changed distances, and every matrix agreed with the R matrix to within $10^{-12}$.
-
-### Matrix construction
-
-Matrices are now computed from integer identifiers of each node's complete path from the root. The table reports the time to build a matrix from lineages already in memory (no network access) for synthetic lineages of 31 nodes generated by random three-way branching, on a single Windows system. Each implementation is compared with its own 0.8.0 algorithm.
-
-| Taxa | R 0.8.0 | R 0.9.0 | Python 0.8.0 | Python 0.9.0 | Julia 0.8.0 | Julia 0.9.0 |
-|---:|---:|---:|---:|---:|---:|---:|
-| 800 | 4.86 s | 0.27 s | 0.18 s | 0.09 s | 0.01 s | 0.01 s |
-| 2000 | — | 1.64 s | 1.20 s | 0.46 s | 0.12 s | 0.05 s |
-
-In R, the default progress bar of 0.8.0 updated once per pair and roughly tripled these times (14.3 s for 800 taxa); in 0.9.0 it updates once per column. These are single measurements on one system and one synthetic design; relative values are more informative than absolute ones, and the times of different languages should not be read as general language benchmarks.
-
-## Version 0.7.0 validation and performance
-
-Release 0.7.0 was revalidated with the same 52-taxon reference set in three order-rotated runs. Across languages, all 468 lineage audit records, resolved identifiers, finite-pair counts, and matrix checksums agreed.
-
-Cached timings below are medians across the three runs; each timing summarizes 15 adaptively calibrated batches on the validation system.
-
-| Cached operation, $n=52$ | R | Python | Julia |
-|---|---:|---:|---:|
-| Distance matrix | 9.250 ms | 4.358 ms | **0.369 ms** |
-| Clustering | 0.086 ms | 0.124 ms | **0.030 ms** |
-| Ordination | 0.633 ms | 0.675 ms | **0.398 ms** |
-
-At this size, Julia constructed the cached matrix 11.8 times faster than Python and 25.1 times faster than R. These values describe this implementation version, dataset, and validation system; they are not universal language benchmarks. Initial lineage retrieval was network-dominated and varied substantially between runs, so it should not be used to rank language performance.
+Validation and performance notes for earlier releases (0.7.0 and 0.9.0) are kept in the [changelog archive](news.qmd#archive-earlier-validation-and-performance-notes).
 
 ## Cache compatibility
 
@@ -476,13 +463,14 @@ The project does not guarantee:
 - identical plot appearance;
 - identical internal clustering arrays;
 - identical eigenvector signs;
-- identical live results obtained from different source revisions.
+- identical random draws: null models and permutation tests (`taxo_distinctness_test()`, `taxo_ses()`, `compare_sources()`) give slightly different simulated values and $p$-values in each language, even with a fixed seed;
+- identical live results obtained from different source revisions, or from different sources.
 
 It does guarantee a shared versioned definition and aims to preserve equivalent labels, distances, MRCA logic, edge-case handling, and reference data.
 
 ## Version reporting
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 

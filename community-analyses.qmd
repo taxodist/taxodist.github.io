@@ -1,0 +1,209 @@
+---
+title: "Community Analyses"
+subtitle: "Taxonomic dissimilarity between samples (Γ+ and Θ+) and standardized effect sizes of community structure (NRI and NTI)."
+---
+
+Version 1.1.0 adds two community analyses built on taxonomic distances: `taxo_dissimilarity()` compares the taxonomic composition of samples, and `taxo_ses()` tests whether the taxa of a sample are more or less closely related than expected by chance. Both accept a distance matrix from any metric and any [source](sources.qmd), and complement the taxonomic distinctness indices of `taxo_distinctness()` (see [Statistical Applications](statistical-applications.qmd)).
+
+::: {.callout-important title="Scope of inference"}
+These statistics are computed on distances in a classification. They describe taxonomic structure, not phylogenetic or functional structure, and depend on the classification, its source, and the distance metric.
+:::
+
+## Example data
+
+The examples use a small offline classification, so they run without network access. The R output on this page is computed when the site is built; the Python and Julia code is equivalent and shown without output.
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```{r}
+library(taxodist)
+
+lineages <- list(
+  Canis   = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"),
+  Vulpes  = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Vulpes"),
+  Felis   = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"),
+  Homo    = c("Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"),
+  Gallus  = c("Biota", "Animalia", "Chordata", "Aves", "Galliformes", "Phasianidae", "Gallus"),
+  Apis    = c("Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Apis"),
+  Bombus  = c("Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Bombus"),
+  Quercus = c("Biota", "Plantae", "Tracheophyta", "Magnoliopsida", "Fagales", "Fagaceae", "Quercus")
+)
+d <- distance_matrix(taxo_from_lineages(lineages), metric = "path", progress = FALSE)
+
+comm <- rbind(
+  forest  = c(Canis = 1, Vulpes = 0, Felis = 1, Homo = 0, Gallus = 1, Apis = 0, Bombus = 1, Quercus = 1),
+  meadow  = c(Canis = 0, Vulpes = 1, Felis = 0, Homo = 0, Gallus = 0, Apis = 1, Bombus = 0, Quercus = 0),
+  village = c(Canis = 1, Vulpes = 0, Felis = 1, Homo = 1, Gallus = 1, Apis = 1, Bombus = 0, Quercus = 0)
+)
+comm
+```
+
+### Python
+
+```python
+import pandas as pd
+import taxodist as td
+
+lineages = {
+    "Canis":   ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Vulpes":  ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Vulpes"],
+    "Felis":   ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Homo":    ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Gallus":  ["Biota", "Animalia", "Chordata", "Aves", "Galliformes", "Phasianidae", "Gallus"],
+    "Apis":    ["Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Apis"],
+    "Bombus":  ["Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Bombus"],
+    "Quercus": ["Biota", "Plantae", "Tracheophyta", "Magnoliopsida", "Fagales", "Fagaceae", "Quercus"],
+}
+d = td.distance_matrix(td.taxo_from_lineages(lineages), metric="path", progress=False)
+
+comm = pd.DataFrame(
+    {"Canis":  [1, 0, 1], "Vulpes": [0, 1, 0], "Felis":   [1, 0, 1], "Homo": [0, 0, 1],
+     "Gallus": [1, 0, 1], "Apis":   [0, 1, 1], "Bombus":  [1, 0, 0], "Quercus": [1, 0, 0]},
+    index=["forest", "meadow", "village"],
+)
+```
+
+### Julia
+
+```julia
+using Taxodist, DataFrames, Random
+
+lineages = [
+    "Canis"   => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Canis"],
+    "Vulpes"  => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Canidae", "Vulpes"],
+    "Felis"   => ["Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Felis"],
+    "Homo"    => ["Biota", "Animalia", "Chordata", "Mammalia", "Primates", "Hominidae", "Homo"],
+    "Gallus"  => ["Biota", "Animalia", "Chordata", "Aves", "Galliformes", "Phasianidae", "Gallus"],
+    "Apis"    => ["Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Apis"],
+    "Bombus"  => ["Biota", "Animalia", "Arthropoda", "Insecta", "Hymenoptera", "Apidae", "Bombus"],
+    "Quercus" => ["Biota", "Plantae", "Tracheophyta", "Magnoliopsida", "Fagales", "Fagaceae", "Quercus"],
+]
+d = distance_matrix(taxo_from_lineages(lineages); metric="path", progress=false)
+
+comm = DataFrame(
+    sample=["forest", "meadow", "village"],
+    Canis=[1, 0, 1], Vulpes=[0, 1, 0], Felis=[1, 0, 1], Homo=[0, 0, 1],
+    Gallus=[1, 0, 1], Apis=[0, 1, 1], Bombus=[1, 0, 0], Quercus=[1, 0, 0],
+)
+```
+
+:::
+
+Samples are rows and taxa are columns; the column names must be labels of the distance matrix. In Julia, a `sample` column of strings names the rows.
+
+## Taxonomic dissimilarity between samples
+
+The forest and the meadow have no taxon in common, so their Bray–Curtis dissimilarity is maximal. The taxonomic dissimilarities $\Gamma^+$ and $\Theta^+$ of Clarke, Somerfield and Chapman (2006) credit the close relatives they do share (a fox and a dog, a honey bee and a bumble bee).
+
+With $\omega_{ij}$ the distance between taxon $i$ of sample 1 and taxon $j$ of sample 2, and $s_1$, $s_2$ the numbers of taxa in each sample:
+
+$$
+\Gamma^+ = \frac{\sum_i \min_j \omega_{ij} + \sum_j \min_i \omega_{ij}}{s_1 + s_2}, \qquad
+\Theta^+ = \frac{1}{2}\left[\frac{\sum_i \min_j \omega_{ij}}{s_1} + \frac{\sum_j \min_i \omega_{ij}}{s_2}\right].
+$$
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```{r}
+taxo_dissimilarity(comm, d)
+taxo_dissimilarity(comm, d, index = "theta_plus")
+```
+
+### Python
+
+```python
+td.taxo_dissimilarity(comm, d)
+td.taxo_dissimilarity(comm, d, index="theta_plus")
+```
+
+### Julia
+
+```julia
+taxo_dissimilarity(comm, d)
+taxo_dissimilarity(comm, d; index="theta_plus")
+```
+
+:::
+
+$\Gamma^+$ is the mean distance from every taxon to its nearest relative in the other sample; $\Theta^+$ averages this mean separately within each sample, so a sample with few taxa weighs as much as a rich one. Taxa shared by both samples contribute zero. On a flat classification, where all distinct taxa are equally distant, $\Gamma^+$ reduces to the presence/absence Bray–Curtis (Sørensen) dissimilarity and $\Theta^+$ to the Kulczynski dissimilarity, times that distance. Abundances are not used.
+
+The result is in the units of `d` (Clarke et al. scale distances so that the largest possible path length is 100, which makes the indices percentages; rescale `d` for that convention). In R it is a `dist` object, ready for ordination, clustering, or PERMANOVA, for example `vegan::adonis2()`; in Python it is a symmetric `pandas.DataFrame`, and in Julia a `TaxonomicDistanceMatrix` between samples. When `d` is omitted, distances are computed with `distance_matrix()` using `metric = "ranked"`, the step weights of Clarke and Warwick.
+
+## Clustering and overdispersion: NRI and NTI
+
+`taxo_ses()` compares the mean pairwise distance (MPD) or the mean nearest-taxon distance (MNTD) of each sample with random samples drawn from a species pool, as in Webb et al. (2002). The standardized effect size is $z = (\text{observed} - \text{null mean}) / \text{null sd}$, and the net relatedness index (NRI, from MPD) and nearest taxon index (NTI, from MNTD) are $-z$.
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```{r}
+set.seed(1)
+taxo_ses(comm, d, n_iter = 499)
+taxo_ses(comm, d, index = "mntd", n_iter = 499)
+```
+
+### Python
+
+```python
+td.print_taxodist_ses(td.taxo_ses(comm, d, n_iter=499, seed=1))
+td.print_taxodist_ses(td.taxo_ses(comm, d, index="mntd", n_iter=499, seed=1))
+```
+
+### Julia
+
+```julia
+taxo_ses(comm, d; n_iter=499, rng=Xoshiro(1))
+taxo_ses(comm, d; index="mntd", n_iter=499, rng=Xoshiro(1))
+```
+
+:::
+
+Positive NRI or NTI means that the taxa of a sample are more closely related than expected from the pool (clustering); negative values mean overdispersion. NRI reflects the structure of the whole classification and NTI that of its terminal branches. `p_lower` and `p_upper` are one-sided permutation p-values, $(1 + \text{count}) / (1 + n_\text{iter})$, for values as low or as high as observed. Samples with fewer than two taxa have missing statistics.
+
+### Choosing the null model
+
+- **Pool** (`null_model = "pool"`, the default): each sample is replaced by the same number of taxa drawn at random, without replacement, from `pool`. The pool defaults to every taxon of `d`; set it to the taxa that could have occurred in the samples, because the result depends on it.
+- **Independent swap** (`null_model = "independent_swap"`): the presence matrix of all samples is randomized with `swaps` independent swaps (Gotelli 2000), keeping the richness of each sample and the frequency of each taxon. It requires at least two samples.
+
+With `abundance_weighted = TRUE` (`True`, `true`), MPD weights each pair of taxa by the product of their abundances (including each taxon with itself, which makes it Rao's quadratic entropy) and MNTD weights each taxon by its abundance, following the abundance-weighted definitions of the picante package.
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+taxo_ses(comm, d, null_model = "independent_swap", n_iter = 499)
+```
+
+### Python
+
+```python
+td.taxo_ses(comm, d, null_model="independent_swap", n_iter=499, seed=1)
+```
+
+### Julia
+
+```julia
+taxo_ses(comm, d; null_model="independent_swap", n_iter=499, rng=Xoshiro(1))
+```
+
+:::
+
+With the pool null model, every taxon of `comm` (every column, even one absent from all samples) must belong to the pool, and `d` must include every taxon of the pool.
+
+### Reproducibility across languages
+
+The observed MPD and MNTD, and the dissimilarities, are deterministic and identical in R, Python, and Julia; shared test fixtures check them. The null distributions come from random draws: use `set.seed()` in R, `seed` in Python, and `rng` in Julia for reproducible results within one language. The random number generators differ, so the null means, standard deviations, effect sizes, and p-values differ slightly between languages, by an amount that decreases as `n_iter` grows.
+
+## References
+
+Clarke, K.R., Somerfield, P.J. & Chapman, M.G. (2006). On resemblance measures for ecological studies, including taxonomic dissimilarities and a zero-adjusted Bray-Curtis coefficient for denuded assemblages. *Journal of Experimental Marine Biology and Ecology* 330, 55–80. <https://doi.org/10.1016/j.jembe.2005.12.017>
+
+Gotelli, N.J. (2000). Null model analysis of species co-occurrence patterns. *Ecology* 81, 2606–2621.
+
+Webb, C.O., Ackerly, D.D., McPeek, M.A. & Donoghue, M.J. (2002). Phylogenies and community ecology. *Annual Review of Ecology and Systematics* 33, 475–505. <https://doi.org/10.1146/annurev.ecolsys.33.010802.150448>

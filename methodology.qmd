@@ -101,11 +101,11 @@ This produces tied distance levels corresponding to shared positions in the hier
 
 The ultrametric inequality can be checked using the fixed `taxobase` object.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
-```r
+```{r}
 library(taxodist)
 data(taxobase, package = "taxodist")
 
@@ -192,11 +192,11 @@ Every metric is zero for identical lineages. Lineages without a shared root have
 
 The `"ranked"` metric reduces each lineage to its root, the nodes of the Linnaean ranks kingdom, phylum, class, order, family, genus, and species, and the queried taxon. Unranked clades, which make up most of the nodes of richly resolved groups, are ignored. For two species, the distance is the number of rank levels up to their shared rank: 1 in the same genus, 2 in the same family, and so on. The rank levels can be changed (`taxodist.rank_levels` in R, `taxodist.distance.RANK_LEVELS` in Python, `Taxodist.RANK_LEVELS[]` in Julia). The Taxonomicon follows current phylogenetic classifications, so that, for example, birds are the subclass Aves of the class Reptilia.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
-```r
+```{r}
 standard <- c(NA, "Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
 lineages <- list(
   Panthera = c("Biota", "Animalia", "Chordata", "Mammalia", "Carnivora", "Felidae", "Panthera"),
@@ -344,9 +344,11 @@ Use `save_cache()` when the exact retrieved lineages must be reused. Cache files
 
 A concise description may be adapted as follows:
 
-> Ordered taxonomic lineages were resolved from The Taxonomicon using `taxodist` version 1.0.0. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.
+> Ordered taxonomic lineages were resolved from The Taxonomicon using `taxodist` version {{< var version >}}. Candidate matches, selected identifiers, resolution statuses, and retrieval dates were retained in an auditable resolution record. For distinct nodes, distance was defined as the reciprocal of the depth of their most recent common ancestor in the continuous common lineage prefix; identical complete lineages received distance zero. The resulting values represent classification depth rather than evolutionary time or phylogenetic branch length.
 
 If another metric is used, replace the distance sentence with its definition, for example: "Distance was defined as half the number of steps between Linnaean rank levels (kingdom to species) separating the two taxa through their lowest shared rank (Clarke and Warwick, 1998)."
+
+If lineages were retrieved from another source, name it instead of The Taxonomicon (for the Open Tree Taxonomy, with the version recorded in the resolution or bundle) and cite it (see [Taxonomic sources](sources.qmd)).
 
 Report retrieval dates, unresolved taxa, and downstream analysis details separately.
 

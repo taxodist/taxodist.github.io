@@ -1,5 +1,10 @@
 project:
   type: website
+  resources:
+    - .nojekyll
+    - googled25722a3226093de.html
+    - schema/taxodist-bundle-v1.schema.json
+    - examples/example.taxodist.json
 
 website:
   title: "taxodist"
@@ -25,8 +30,14 @@ website:
             text: Methodology
           - href: statistical-applications.qmd
             text: Statistical Applications
+          - href: sources.qmd
+            text: Taxonomic Sources
+          - href: community-analyses.qmd
+            text: Community Analyses
           - href: cross-language-compatibility.qmd
             text: Cross-language Compatibility
+          - href: bundle-format.qmd
+            text: Bundle Format
       - href: reference.qmd
         text: Reference
       - href: news.qmd
@@ -35,7 +46,7 @@ website:
         text: About
     right:
       - text: "Web app"
-        href: https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/
+        href: app.qmd
       - text: Source
         icon: github
         menu:
@@ -47,7 +58,7 @@ website:
             href: https://github.com/rodrigosqrt3/Taxodist.jl
 
   page-footer:
-    left: "taxodist 1.0.0"
+    left: "taxodist {{< var version >}}"
     right:
       - text: R
         href: https://cran.r-project.org/package=taxodist
@@ -70,3 +81,11 @@ format:
     code-overflow: wrap
     anchor-sections: true
     smooth-scroll: true
+
+execute:
+  freeze: auto
+
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"

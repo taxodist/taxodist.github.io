@@ -1,35 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://taxodist.github.io/about.html</loc>
-    <lastmod>2026-11-06T14:36:20.435Z</lastmod>
-  </url>
-  <url>
-    <loc>https://taxodist.github.io/cross-language-compatibility.html</loc>
-    <lastmod>2026-11-06T14:36:22.249Z</lastmod>
-  </url>
-  <url>
-    <loc>https://taxodist.github.io/getting-started.html</loc>
-    <lastmod>2026-11-06T14:36:24.602Z</lastmod>
-  </url>
-  <url>
-    <loc>https://taxodist.github.io/index.html</loc>
-    <lastmod>2026-11-06T14:36:25.785Z</lastmod>
-  </url>
-  <url>
-    <loc>https://taxodist.github.io/methodology.html</loc>
-    <lastmod>2026-11-06T14:36:27.103Z</lastmod>
-  </url>
-  <url>
-    <loc>https://taxodist.github.io/news.html</loc>
-    <lastmod>2026-11-06T14:36:28.388Z</lastmod>
+    <loc>https://taxodist.github.io/statistical-applications.html</loc>
+    <lastmod>2026-11-24T12:03:55.164Z</lastmod>
   </url>
   <url>
     <loc>https://taxodist.github.io/reference.html</loc>
-    <lastmod>2026-11-06T14:36:29.954Z</lastmod>
+    <lastmod>2026-11-25T11:38:01.396Z</lastmod>
   </url>
   <url>
-    <loc>https://taxodist.github.io/statistical-applications.html</loc>
-    <lastmod>2026-11-06T14:36:31.124Z</lastmod>
+    <loc>https://taxodist.github.io/methodology.html</loc>
+    <lastmod>2026-11-25T11:42:46.836Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/getting-started.html</loc>
+    <lastmod>2026-11-25T11:41:38.921Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/community-analyses.html</loc>
+    <lastmod>2026-11-25T11:40:52.791Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/app.html</loc>
+    <lastmod>2026-11-25T11:40:03.677Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/about.html</loc>
+    <lastmod>2026-11-25T11:39:57.025Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/bundle-format.html</loc>
+    <lastmod>2026-11-25T11:42:24.620Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/cross-language-compatibility.html</loc>
+    <lastmod>2026-11-25T11:42:16.096Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/index.html</loc>
+    <lastmod>2026-11-25T14:15:58.508Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/news.html</loc>
+    <lastmod>2026-11-25T11:36:40.368Z</lastmod>
+  </url>
+  <url>
+    <loc>https://taxodist.github.io/sources.html</loc>
+    <lastmod>2026-11-25T11:39:09.457Z</lastmod>
   </url>
 </urlset>

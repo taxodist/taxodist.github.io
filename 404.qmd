@@ -1,0 +1,13 @@
+---
+title: "Page not found"
+toc: false
+---
+
+The page you requested does not exist or has moved.
+
+- [Home](/index.html)
+- [Introduction and usage](/getting-started.html)
+- [Function reference](/reference.html)
+- [Changelog](/news.html)
+
+You can also use the search box in the navigation bar.
