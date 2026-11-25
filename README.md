@@ -2,9 +2,9 @@
 
 Documentation website for [`taxodist`](https://taxodist.github.io/), an open-source project for taxonomic hierarchy distances and lineage analysis in R, Python, and Julia.
 
-The current coordinated release is **1.0.0**, the first stable release.
+The current coordinated release is **1.1.0**, which adds taxonomic sources and community analyses.
 
-The site documents how `taxodist` retrieves ordered lineages from [The Taxonomicon](http://taxonomicon.taxonomy.nl), compares taxa through the depth of their most recent common ancestor, and integrates the resulting distance objects with multivariate analysis workflows.
+The site documents how `taxodist` retrieves ordered lineages from [The Taxonomicon](http://taxonomicon.taxonomy.nl) (or, since 1.1.0, the Open Tree Taxonomy and the NCBI Taxonomy), compares taxa through the depth of their most recent common ancestor, and integrates the resulting distance objects with multivariate analysis workflows.
 
 > `taxodist` measures separation within a recorded taxonomic classification. Its values are not evolutionary time, genetic distance, morphological divergence, or phylogenetic branch length.
 
@@ -16,6 +16,8 @@ The website includes:
 - the definition, properties, assumptions, and limitations of the distance measure and of the alternative path-length, Wu–Palmer, and rank-based metrics;
 - lineage node ranks and the taxonomic diversity and distinctness indices of Clarke and Warwick;
 - statistical applications using clustering, ordination, taxonomic distinctness, Mantel tests, and PERMANOVA;
+- the three taxonomic sources (The Taxonomicon, Open Tree Taxonomy, NCBI Taxonomy) and the comparison of analyses across them;
+- community analyses: taxonomic dissimilarity between samples (Γ+, Θ+) and standardized effect sizes (NRI, NTI);
 - a cross-language compatibility guide;
 - auditable name-resolution and fully offline lineage workflows;
 - classification trees built directly from lineages and distances between two sets of taxa;
@@ -52,7 +54,7 @@ Rendered files are written to `_site/`.
 
 ## Data source
 
-Lineage data retrieved by `taxodist` originate from **The Taxonomicon**, based on *Systema Naturae 2000* by S. J. Brands. Published analyses should cite both the software and the underlying classification source.
+By default, lineage data retrieved by `taxodist` originate from **The Taxonomicon**, based on *Systema Naturae 2000* by S. J. Brands; the Open Tree Taxonomy (Rees & Cranston 2017) and the NCBI Taxonomy (Schoch et al. 2020) are optional sources. Published analyses should cite both the software and the underlying classification source.
 
 ## License
 

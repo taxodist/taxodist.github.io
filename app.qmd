@@ -1,0 +1,39 @@
+---
+title: "Web app"
+subtitle: "A browser interface to taxodist for exploring lineages and distances without writing code."
+---
+
+The [taxodist web application](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/) is a [Shiny](https://shiny.posit.co/) front end to the R package. It queries The Taxonomicon through the CRAN release of `taxodist`, so its results follow the same lineage parser and distance definitions as the packages. The interface is available in English, Portuguese, Spanish, French, and German.
+
+[Open the web app](https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/){.btn .btn-primary role="button"}
+
+## What you can do
+
+The app is organized in tabs, each corresponding to a common task:
+
+| Tab | Purpose |
+|---|---|
+| Pairwise Distance | Distance between two taxa, with both lineages and their most recent common ancestor |
+| Distance Matrix | Matrix for a list of taxa (pasted or uploaded as CSV), with a classification tree and an ordination |
+| Between Groups | Distances from one group of taxa to another |
+| Closest Relative | Candidates ranked by taxonomic proximity to a query taxon |
+| Lineage Explorer | Full lineage of a taxon, with clade membership checks |
+| Search Database | Candidate records and numeric identifiers from The Taxonomicon |
+| Coverage Check | Which names in a list are found in The Taxonomicon |
+| Filter by Clade | Members of a list that belong to a given clade |
+
+Results can be downloaded as CSV tables, PNG plots, Newick trees, and portable analysis bundles (JSON, see [Bundle format](bundle-format.qmd)), and many queries can be shared with a link that reopens them.
+
+## Version 1.0 features
+
+The app is being updated to the 1.0.0 packages. The update adds **metric selection**, a **resolution audit** of how each name was matched, **taxonomic distinctness**, and **bundles** that can be uploaded and compared, as well as node ranks. These features are being rolled out gradually and may not all be visible in the deployed app yet; the R, Python, and Julia packages provide all of them today (see the [guide](getting-started.qmd)).
+
+## Not yet in the app: version 1.1.0 features
+
+The app runs the version of the R package published on CRAN, so it does not yet offer the features added in version 1.1.0: lineages from the [Open Tree and NCBI taxonomies](sources.qmd) (the app always queries The Taxonomicon), `compare_sources()`, and the [community analyses](community-analyses.qmd) `taxo_dissimilarity()` and `taxo_ses()`. Use the R, Python, or Julia packages for them.
+
+## Limitations
+
+- The app is hosted on a shared [shinyapps.io](https://www.shinyapps.io/) instance. It may take a few seconds to start, and long lists are slower than in a local session because requests to The Taxonomicon are deliberately spaced.
+- Live results depend on the current state of The Taxonomicon. For analyses that must be reproduced later, download the analysis bundle, or use the packages directly and record the package version, retrieval date, and numeric identifiers.
+- For large or scripted analyses, use the [R, Python, or Julia packages](getting-started.qmd).

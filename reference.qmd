@@ -1,6 +1,6 @@
 ---
 title: "Function Reference"
-subtitle: "Public API for taxodist 1.0.0 in R, Python, and Julia."
+subtitle: "Public API for taxodist 1.1.0 in R, Python, and Julia."
 ---
 
 The R, Python, and Julia implementations share the same distance semantics and principal function names. Native return types follow the conventions of each language.
@@ -21,7 +21,8 @@ Functions that compute distances accept `metric = "reciprocal"` (the default), `
 | Setting | Default | R | Python | Julia |
 |---|---|---|---|---|
 | Attempts per request (retried with exponential backoff after network errors and 5xx responses) | 3 | `options(taxodist.max_tries = n)` | `taxodist.fetch.MAX_TRIES = n` | `Taxodist.MAX_TRIES[] = n` |
-| Minimum interval between consecutive requests, in seconds (0 disables it) | 0.25 | `options(taxodist.min_interval = s)` | `taxodist.fetch.MIN_INTERVAL = s` | `Taxodist.MIN_INTERVAL[] = s` |
+| Minimum interval between consecutive requests, in seconds (0 disables it); applied to each source independently, with a floor of 0.4 s for NCBI (0.12 s with an API key) | 0.25 | `options(taxodist.min_interval = s)` | `taxodist.fetch.MIN_INTERVAL = s` | `Taxodist.MIN_INTERVAL[] = s` |
+| NCBI API key (raises NCBI's limit from three to ten requests per second) | `NCBI_API_KEY` environment variable | `options(taxodist.ncbi_api_key = "...")` | `taxodist.sources.NCBI_API_KEY = "..."` | `Taxodist.NCBI_API_KEY[] = "..."` |
 | Rank levels used by `metric = "ranked"` | kingdom, phylum, class, order, family, genus, species | `options(taxodist.rank_levels = ...)` | `taxodist.distance.RANK_LEVELS = [...]` | `Taxodist.RANK_LEVELS[] = [...]` |
 | Persistent cache directory | per-user cache directory | `tools::R_user_dir("taxodist", "cache")` | `TAXODIST_CACHE_DIR` | `TAXODIST_CACHE_DIR` |
 
@@ -111,16 +112,18 @@ For ambiguous names, inspect `taxo_search()` and record the selected numeric ID 
 
 ```text
 R:      taxo_resolve(taxa, ambiguity = "warn", verbose = FALSE,
-                     progress = TRUE, within = NULL)
+                     progress = TRUE, within = NULL, source = "taxonomicon")
 Python: taxo_resolve(taxa, ambiguity="warn", verbose=False,
-                     progress=True, within=None)
+                     progress=True, within=None, source="taxonomicon")
 Julia:  taxo_resolve(taxa; ambiguity="warn", verbose=false,
-                     progress=true, within=nothing)
+                     progress=true, within=nothing, source="taxonomicon")
 ```
 
 Resolves a complete input vector before analysis. Repeated names, including spellings that differ only in whitespace, retain their original positions but are retrieved only once. Numeric identifiers bypass name search. Selected lineages are truncated exactly as in `get_lineage()`.
 
-`ambiguity` accepts `"warn"`, `"first"`, or `"error"`. Ambiguous rows retain `status = "ambiguous"` even when the first candidate is selected. Candidates marked as invalid, rejected, nude, or illegitimate names (`nom. inval.`, `nom. rej.`, `nom. nud.`, `nom. illeg.`) are considered only after the others. `within` optionally names a clade; only candidates whose lineage contains it (exact, case-insensitive match) are considered, and names without such a candidate are `unresolved`.
+`ambiguity` accepts `"warn"`, `"first"`, or `"error"`. Ambiguous rows retain `status = "ambiguous"` even when the first candidate is selected. Candidates marked as invalid, rejected, nude, or illegitimate names (`nom. inval.`, `nom. rej.`, `nom. nud.`, `nom. illeg.`) are considered only after the others. A candidate nested in another candidate of the same name (for example the nominotypical subgenus *Mus (Mus)* inside the genus *Mus*) is not counted as a homonym. `within` optionally names a clade; only candidates whose lineage contains it (exact, case-insensitive match) are considered, and names without such a candidate are `unresolved`. Clade names depend on the source (animals are `"Animalia"` in The Taxonomicon and `"Metazoa"` in the Open Tree and NCBI taxonomies).
+
+`source` (new in 1.1.0) selects the classification: `"taxonomicon"` (default), `"ott"` (Open Tree Taxonomy), or `"ncbi"` (NCBI Taxonomy); see [`taxo_sources()`](#taxo_sources) and [Taxonomic sources](sources.qmd). Identifiers of the other sources carry a prefix (`"ott:770309"`, `"ncbi:9606"`), which may be omitted in the input when `source` is set. The resolution records the source and, for the Open Tree Taxonomy, its version.
 
 **Returns:** a `taxodist_resolution` data frame in R, `TaxodistResolution` in Python, or `TaxodistResolution` wrapping a Julia `DataFrame`. Each input has:
 
@@ -155,14 +158,17 @@ Creates an auditable resolution from named, root-to-tip lineages without network
 
 ```text
 R:      taxo_bundle(taxa, ambiguity = "warn", verbose = FALSE,
-                    progress = TRUE, within = NULL, metric = "reciprocal")
+                    progress = TRUE, within = NULL, metric = "reciprocal",
+                    source = "taxonomicon")
 Python: taxo_bundle(taxa, ambiguity="warn", verbose=False,
-                    progress=True, within=None, metric="reciprocal")
+                    progress=True, within=None, metric="reciprocal",
+                    source="taxonomicon")
 Julia:  taxo_bundle(taxa; ambiguity="warn", verbose=false,
-                    progress=true, within=nothing, metric="reciprocal")
+                    progress=true, within=nothing, metric="reciprocal",
+                    source="taxonomicon")
 ```
 
-Combines a resolution object, its distance matrix under `metric`, source metadata, software metadata, and the metric definition. `taxa` may be raw names or an existing resolution; the remaining arguments are passed to `taxo_resolve()` for names.
+Combines a resolution object, its distance matrix under `metric`, source metadata, software metadata, and the metric definition. `taxa` may be raw names or an existing resolution; the remaining arguments, including `source` (new in 1.1.0), are passed to `taxo_resolve()` for names. The bundle records the source of the resolution (with the Open Tree Taxonomy version); a resolution without a recorded source is labelled as coming from The Taxonomicon.
 
 **Returns:** `taxodist_bundle` in R or `TaxodistBundle` in Python and Julia.
 
@@ -191,7 +197,45 @@ Julia:  compare_bundles(old, new; tolerance=sqrt(eps(Float64)))
 
 Compares two bundles, or two bundle files, for example the same analysis repeated after the source classification was updated. Each input label is classified as `unchanged`, `added`, `removed`, `status_changed`, `id_changed`, or `lineage_changed`.
 
-**Returns:** a comparison object with a `taxa` table (input, change, statuses, identifiers, and lineage depths in both bundles), a `distances` table of pairs present in both bundles whose distance changed, and the two creation timestamps. Printing it summarizes the changes.
+**Returns:** a comparison object with a `taxa` table (input, change, statuses, identifiers, and lineage depths in both bundles), a `distances` table of pairs present in both bundles whose distance changed, the two creation timestamps, and (since 1.1.0) the metric of each bundle (`metric_old`, `metric_new`) and whether it changed (`metric_changed`); the printed summary warns when the distances are not comparable. In R (`print()`) and Python (`print()`, through `__str__`), printing it summarizes the changes. In Julia, the summary is shown by REPL/notebook display (`display()` or `show(stdout, MIME"text/plain"(), x)`); `print()` or `string()` show the raw `TaxodistBundleComparison` struct, so use the `taxa` and `distances` fields directly in scripts.
+
+## Taxonomic sources
+
+New in 1.1.0. See [Taxonomic sources](sources.qmd) for a guide.
+
+### `taxo_sources()`
+
+```text
+R:      taxo_sources()
+Python: taxo_sources()
+Julia:  taxo_sources()
+```
+
+Describes the classifications from which `taxo_resolve()` and `taxo_bundle()` can retrieve lineages: The Taxonomicon (`"taxonomicon"`, the default), the Open Tree of Life reference taxonomy (`"ott"`), and the NCBI Taxonomy (`"ncbi"`). Lineages are ordered from the root of each source (`"Biota"`, `"life"`, and `"cellular organisms"` respectively) to the taxon. Distances are only comparable within one source.
+
+**Returns:** a data frame (`pandas.DataFrame` in Python, `DataFrame` in Julia) with one row per source and columns `id` (the value accepted by `source`), `name`, `url`, `id_prefix` (`""`, `"ott:"`, `"ncbi:"`), `ranks`, `licence`, and `citation`.
+
+### `compare_sources()`
+
+```text
+R:      compare_sources(taxa, sources = c("taxonomicon", "ott", "ncbi"),
+                        metric = "reciprocal", ambiguity = "first",
+                        within = NULL, permutations = 999L,
+                        verbose = FALSE, progress = TRUE)
+Python: compare_sources(taxa, sources=("taxonomicon", "ott", "ncbi"),
+                        metric="reciprocal", ambiguity="first",
+                        within=None, permutations=999,
+                        verbose=False, progress=True, seed=None)
+Julia:  compare_sources(taxa; sources=["taxonomicon", "ott", "ncbi"],
+                        metric="reciprocal", ambiguity="first",
+                        within=nothing, permutations=999,
+                        verbose=false, progress=true,
+                        rng=Random.default_rng())
+```
+
+Resolves the same taxa (at least three names; identifiers are specific to one source and are not accepted) in at least two sources and compares the resulting classifications: the lineage depth of every taxon in each source, and the agreement between the distance matrices, measured by the Spearman correlation and a Mantel permutation test. `within` is one clade name used for every source, or one name per source (a named character vector in R, a `dict` in Python, a dictionary, named tuple, or vector of pairs in Julia). `permutations = 0` skips the Mantel test, whose p-value is `(1 + count) / (1 + permutations)`, counting permutations whose correlation is at least the observed one. For reproducible p-values, use `set.seed()` in R, `seed` in Python, and `rng` in Julia; the permutations differ between languages.
+
+**Returns:** a `taxodist_source_comparison` in R, `TaxodistSourceComparison` in Python and Julia, with `resolutions` (one resolution per source), `matrices` (distance matrices restricted to `shared`, the taxa resolved in every source), `shared`, `taxa` (one row per input with `status_<source>`, `id_<source>`, and `depth_<source>`), `agreement` (one row per pair of sources with `source_a`, `source_b`, `n_taxa`, `spearman`, and `p_value`, missing when not computed), `metric`, and `permutations`. Printing it (in Julia, REPL display) shows a summary.
 
 ## Distance computation
 
@@ -426,7 +470,7 @@ $$
 
 `comm` is a vector of taxon names (one sample, presence only), a named vector, dictionary, or series of abundances (one sample), or a matrix or data frame with one row per sample and one column per taxon. In Julia, a numeric matrix takes its taxon names from `taxa` and its sample names from `samples`. `d` is a distance matrix whose labels include every taxon present; when omitted, it is computed with `distance_matrix()` under `metric`. The default `"ranked"` metric reproduces the classical indices based on Linnaean ranks; the other metrics use the full resolution of the classification. With presence-only data, $\Delta$ and $\Delta^*$ equal $\Delta^+$. Results agree with `vegan::taxondive()`.
 
-**Returns:** one row per sample with columns `sample`, `S`, `Delta`, `Delta_star`, `Delta_plus`, `Lambda_plus`, and `SDelta_plus` ($S\Delta^+$): a `taxodist_distinctness` data frame in R, a `pandas.DataFrame` with `attrs["metric"]` in Python, and a named tuple `(metric, data)` in Julia. Indices are missing for samples with fewer than two taxa or when a distance between present taxa is missing or infinite.
+**Returns:** one row per sample with columns `sample`, `S`, `Delta`, `Delta_star`, `Delta_plus`, `Lambda_plus`, and `SDelta_plus` ($S\Delta^+$): a `taxodist_distinctness` data frame in R, a `pandas.DataFrame` with `attrs["metric"]` in Python, and a `TaxodistDistinctness` with fields `metric` and `data` in Julia (a named tuple `(metric, data)` before 1.1.0; indexing by name and destructuring still work). R prints a formatted table with the metric, Python can format it with `print_taxodist_distinctness()`, and Julia displays it like R. Indices are missing for samples with fewer than two taxa or when a distance between present taxa is missing or infinite.
 
 ### `taxo_distinctness_test()`
 
@@ -439,7 +483,62 @@ Julia:  taxo_distinctness_test(sample, d; n_iter=999,
 
 Compares $\Delta^+$ and $\Lambda^+$ of a sample (a vector of taxon names) with their distribution in `n_iter` random samples of the same number of taxa drawn without replacement from the master list (species pool) represented by `d`. The expected $\Delta^+$ is the mean distance over all pairs of the master list; the expected $\Lambda^+$ is the mean of the simulated values. A $\Delta^+$ below the lower limit indicates that the sample is less taxonomically distinct than expected from the pool. For reproducible results, use `set.seed()` in R, `seed` in Python, and `rng` in Julia; the random draws differ between languages.
 
-**Returns:** an object with `statistics` (rows `Delta_plus` and `Lambda_plus`; columns `observed`, `expected`, `lower` and `upper` — the 2.5% and 97.5% quantiles of the random samples — and the one-sided permutation p-values `p_lower` and `p_upper`), `simulated` (the simulated values), and the settings `S`, `pool_size`, `n_iter`, and `metric`. R returns class `taxodist_distinctness_test`, Python `TaxodistDistinctnessTest`, and Julia a named tuple.
+**Returns:** an object with `statistics` (rows `Delta_plus` and `Lambda_plus`; columns `observed`, `expected`, `lower` and `upper` — the 2.5% and 97.5% quantiles of the random samples — and the one-sided permutation p-values `p_lower` and `p_upper`), `simulated` (the simulated values), and the settings `S`, `pool_size`, `n_iter`, and `metric`. R returns class `taxodist_distinctness_test` and Python `TaxodistDistinctnessTest`, both of which print a summary; Julia returns a plain named tuple that prints as is (inspect `result.statistics`).
+
+## Community analyses
+
+New in 1.1.0. See [Community analyses](community-analyses.qmd) for worked examples.
+
+### `taxo_dissimilarity()`
+
+```text
+R:      taxo_dissimilarity(comm, d = NULL, index = "gamma_plus",
+                           metric = "ranked", verbose = FALSE,
+                           progress = TRUE)
+Python: taxo_dissimilarity(comm, d=None, index="gamma_plus",
+                           metric="ranked", verbose=False, progress=True)
+Julia:  taxo_dissimilarity(comm, d=nothing; index="gamma_plus",
+                           metric="ranked", verbose=false, progress=true,
+                           taxa=nothing, samples=nothing)
+```
+
+Computes the taxonomic dissimilarity $\Gamma^+$ (`"gamma_plus"`) or $\Theta^+$ (`"theta_plus"`) of Clarke, Somerfield and Chapman (2006) between every pair of samples. With $\omega_{ij}$ the distance between taxon $i$ of sample 1 and taxon $j$ of sample 2, and $s_1$, $s_2$ the numbers of taxa in each sample,
+
+$$
+\Gamma^+ = \frac{\sum_i \min_j \omega_{ij} + \sum_j \min_i \omega_{ij}}{s_1 + s_2}, \qquad
+\Theta^+ = \frac{1}{2}\left[\frac{\sum_i \min_j \omega_{ij}}{s_1} + \frac{\sum_j \min_i \omega_{ij}}{s_2}\right].
+$$
+
+Taxa shared by both samples contribute zero, so samples without any taxon in common are still similar when their taxa are closely related. On a flat classification the indices reduce to the presence/absence Bray–Curtis (Sørensen) and Kulczynski dissimilarities, times that distance. `comm` has one row per sample and one column per taxon (in Julia, any format accepted by `taxo_distinctness()`); values greater than zero mean presence, and abundances are not used. `d` is a distance matrix whose labels include every taxon present; when omitted, it is computed with `distance_matrix()` under `metric`. Clarke et al. scale distances so that the largest possible path length is 100; values are returned in the units of `d`.
+
+**Returns:** a `dist` object between samples in R (attributes `method` and `metric`), a symmetric `pandas.DataFrame` in Python (`attrs["method"]`, `attrs["metric"]`), or a `TaxonomicDistanceMatrix` between samples in Julia (fields `method` and `metric`). Pairs involving a sample without taxa, or whose nearest-relative distances are missing or infinite, are missing (`NA`/`NaN`).
+
+### `taxo_ses()`
+
+```text
+R:      taxo_ses(comm, d = NULL, index = "mpd", null_model = "pool",
+                 pool = NULL, n_iter = 999, abundance_weighted = FALSE,
+                 swaps = 1000, metric = "reciprocal", verbose = FALSE,
+                 progress = TRUE)
+Python: taxo_ses(comm, d=None, index="mpd", null_model="pool", pool=None,
+                 n_iter=999, abundance_weighted=False, swaps=1000,
+                 metric="reciprocal", verbose=False, progress=True,
+                 seed=None)
+Julia:  taxo_ses(comm, d=nothing; index="mpd", null_model="pool",
+                 pool=nothing, n_iter=999, abundance_weighted=false,
+                 swaps=1000, metric="reciprocal", verbose=false,
+                 progress=true, taxa=nothing, samples=nothing,
+                 rng=Random.default_rng())
+```
+
+Compares the mean pairwise distance (MPD, `index = "mpd"`) or the mean nearest-taxon distance (MNTD, `index = "mntd"`) among the taxa of each sample with its distribution under a null model, giving the net relatedness index (NRI) and nearest taxon index (NTI) of Webb et al. (2002) on taxonomic distances. `comm` is a vector of taxa (one sample), named abundances (one sample), or a matrix or data frame with one row per sample.
+
+- `null_model = "pool"` (default): each sample is replaced by the same number of taxa drawn at random without replacement from `pool` (default: every label of `d`); with abundance weighting, the observed abundances are assigned to the drawn taxa.
+- `null_model = "independent_swap"`: the presence matrix of all samples is randomized with `swaps` independent swaps (Gotelli 2000), keeping the number of taxa of every sample and the number of samples in which every taxon occurs. Requires at least two samples.
+
+With `abundance_weighted` enabled, MPD weights each pair of taxa by the product of their abundances (including each taxon with itself, i.e. Rao's quadratic entropy) and MNTD weights each taxon by its abundance, as in the picante package. Positive NRI and NTI indicate taxonomic clustering; negative values indicate overdispersion. For reproducible results use `set.seed()` in R, `seed` in Python, and `rng` in Julia; the random draws differ between languages.
+
+**Returns:** one row per sample with columns `sample`, `S`, `observed`, `null_mean`, `null_sd`, `z` (`(observed - null_mean) / null_sd`), `NRI` or `NTI` (`-z`), `p_lower` and `p_upper` (one-sided permutation p-values, `(1 + count) / (1 + n_iter)`), and `n_iter`: a `taxodist_ses` data frame in R, a `pandas.DataFrame` in Python (settings in `attrs`; print with `print_taxodist_ses()`), or a `TaxodistSES` in Julia (fields `data`, `index`, `null_model`, `abundance_weighted`, `pool_size`, and `metric`; columns are also available as properties, e.g. `result.NRI`). Samples with fewer than two taxa have missing statistics.
 
 ## Multivariate analysis and visualization
 
@@ -456,8 +555,10 @@ Accepts taxon names, a resolution, a bundle, or a previously computed distance o
 **Returns:**
 
 - R: a `taxodist_cluster` list with `hclust` and `dist`;
-- Python: a dictionary with `hclust` (SciPy linkage matrix) and `dist`;
+- Python: a dictionary with `hclust` (SciPy linkage matrix), `dist`, `method`, and, since 1.1.0, R's `merge`, `height`, `order`, and `labels`;
 - Julia: a named tuple with `hclust` (`Clustering.Hclust`), `dist`, and `method`.
+
+Since 1.1.0, Python and Julia cluster with ports of the routines of R's `stats::hclust()`, so merges, heights, and leaf order equal R's for all methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`, `"ward.D2"`, `"mcquitty"`, `"median"`, `"centroid"`), also when distances are tied.
 
 If the matrix contains missing or infinite values, or represents fewer than two taxa, clustering is skipped and `hclust` is `NULL`/`None`.
 
@@ -566,6 +667,6 @@ R stores distance components as `dist`; Python converts matrices to labeled `pan
 
 ## Display helpers
 
-R uses S3 methods for distance results, focal results, paths, clusters, ordinations, resolutions, bundles, bundle comparisons, and distinctness results. Python exposes corresponding explicit helpers: `print_taxodist_result()`, `print_focal_distances()`, `print_taxodist_path()`, `print_taxodist_distinctness()`, `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()`. Julia provides `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()` alongside native display of named tuples, data frames, and labeled matrices. The plotting helpers need `pip install "taxodist[plot]"` in Python and `using Plots` in Julia.
+R uses S3 methods for distance results, focal results, paths, clusters, ordinations, resolutions, bundles, bundle comparisons, source comparisons, distinctness results, and effect sizes. Python exposes corresponding explicit helpers: `print_taxodist_result()`, `print_focal_distances()`, `print_taxodist_path()`, `print_taxodist_distinctness()`, `print_taxodist_ses()`, `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()`. Julia provides `plot_taxodist_cluster()`, `plot_taxodist_ord()`, and `summary_taxodist_ord()` alongside native display of named tuples, data frames, and labeled matrices. The plotting helpers need `pip install "taxodist[plot]"` in Python and `using Plots` in Julia.
 
 For complete argument documentation in R, run `help(package = "taxodist")`. In Python, use `help(taxodist.function_name)`. In Julia, use help mode, for example `?taxo_distance`.

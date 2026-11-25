@@ -1,0 +1,236 @@
+---
+title: "Taxonomic Sources"
+subtitle: "Retrieving lineages from The Taxonomicon, the Open Tree Taxonomy, or the NCBI Taxonomy, and measuring how much an analysis depends on the classification."
+---
+
+A taxonomic distance is a property of the classification it is computed from. Since version 1.1.0, `taxodist` can retrieve lineages from three classifications, and `compare_sources()` measures how much the distances among a set of taxa change from one classification to another.
+
+::: {.callout-note title="Code on this page"}
+Chunks that need the internet are shown without output. The only executed chunk is `taxo_sources()`, which works offline.
+:::
+
+## The three sources
+
+```{r}
+library(taxodist)
+
+taxo_sources()[, c("id", "name", "id_prefix")]
+```
+
+| `source` | Classification | Identifiers | Root of every lineage | Retrieved from |
+|---|---|---|---|---|
+| `"taxonomicon"` (default) | [The Taxonomicon](http://taxonomicon.taxonomy.nl) (Brands 1989 onwards), based on *Systema Naturae 2000* | numeric, without prefix (`"50841"`) | `"Biota"` | its web pages |
+| `"ott"` | [Open Tree of Life reference taxonomy](https://tree.opentreeoflife.org/about/taxonomy-version) (Rees and Cranston 2017) | `"ott:770309"` | `"life"` | the Open Tree of Life API |
+| `"ncbi"` | [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) (Schoch et al. 2020) | `"ncbi:9606"` | `"cellular organisms"` | the NCBI E-utilities |
+
+- **The Taxonomicon** is a single curated classification with very deep lineages, many unranked clades, and extensive fossil coverage. It remains the default, and every name-based function (`get_lineage()`, `taxo_distance()`, `distance_matrix()` on names, and so on) looks names up there.
+- **The Open Tree Taxonomy** synthesizes NCBI, GBIF, WoRMS, IRMNG, and other taxonomies.
+- **The NCBI Taxonomy** covers organisms with sequence data.
+
+`taxo_sources()` also returns the URL, licence, and preferred citation of every source. Cite the source your lineages come from (see [About](about.qmd#citation)).
+
+## Choosing a source
+
+The other sources are selected with the `source` argument of `taxo_resolve()` and `taxo_bundle()`:
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+library(taxodist)
+
+apes <- c("Homo", "Pan", "Gorilla", "Pongo", "Hylobates")
+ott  <- taxo_resolve(apes, source = "ott")
+ncbi <- taxo_resolve(apes, source = "ncbi")
+
+ott$id                       # prefixed identifiers, e.g. "ott:770309" for Homo
+attr(ott, "source")          # the source, with the Open Tree Taxonomy version
+
+distance_matrix(ott)
+taxo_tree(ncbi)
+bundle <- taxo_bundle(ott)   # the bundle records the source and its version
+```
+
+### Python
+
+```python
+import taxodist as td
+
+apes = ["Homo", "Pan", "Gorilla", "Pongo", "Hylobates"]
+ott = td.taxo_resolve(apes, source="ott")
+ncbi = td.taxo_resolve(apes, source="ncbi")
+
+ott["id"]                    # prefixed identifiers, e.g. "ott:770309" for Homo
+ott.source, ott.source_url   # the source, with the Open Tree Taxonomy version
+
+td.distance_matrix(ott)
+td.taxo_tree(ncbi)
+bundle = td.taxo_bundle(ott)  # the bundle records the source and its version
+```
+
+### Julia
+
+```julia
+using Taxodist
+
+apes = ["Homo", "Pan", "Gorilla", "Pongo", "Hylobates"]
+ott = taxo_resolve(apes; source="ott")
+ncbi = taxo_resolve(apes; source="ncbi")
+
+ott.source, ott.source_url   # the source, with the Open Tree Taxonomy version
+
+distance_matrix(ott)
+taxo_tree(ncbi)
+bundle = taxo_bundle(ott)    # the bundle records the source and its version
+```
+
+:::
+
+A resolution from any source works with every function that accepts a resolution: `distance_matrix()`, `cross_distances()`, `taxo_tree()`, `taxo_bundle()`, and, through the matrix, `taxo_distinctness()`, `taxo_dissimilarity()`, and `taxo_ses()`. `taxo_bundle()` with `source` resolves the names and builds the bundle in one step.
+
+### Identifiers
+
+Identifiers stored in resolutions and bundles carry a source prefix: `"ott:770309"` for an Open Tree Taxonomy identifier and `"ncbi:9606"` for an NCBI identifier. Taxonomicon identifiers have no prefix. When `source` is set, an identifier can be passed with or without its prefix (`taxo_resolve("9606", source = "ncbi")` and `taxo_resolve("ncbi:9606", source = "ncbi")` are equivalent). Identifiers are specific to one source.
+
+### Ranks and provenance
+
+Ranks are recorded in the same form as for The Taxonomicon (the `ranks` column of the resolution). The resolution records the name and URL of its source; for the Open Tree Taxonomy, the name includes the version of the taxonomy served by the API at the time of retrieval. Bundles copy this into their `source` field, so a bundle documents which classification, and which version of it, its distances were computed from. See [Bundle Format](bundle-format.qmd).
+
+### Clade names and `within`
+
+Clade names differ between classifications, which matters for the `within` argument: animals are `"Animalia"` in The Taxonomicon but `"Metazoa"` in the Open Tree and NCBI taxonomies.
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+taxo_resolve("Nereis", within = "Animalia")                  # The Taxonomicon
+taxo_resolve("Nereis", within = "Metazoa", source = "ncbi")  # NCBI Taxonomy
+```
+
+### Python
+
+```python
+td.taxo_resolve(["Nereis"], within="Animalia")                 # The Taxonomicon
+td.taxo_resolve(["Nereis"], within="Metazoa", source="ncbi")   # NCBI Taxonomy
+```
+
+### Julia
+
+```julia
+taxo_resolve(["Nereis"]; within="Animalia")                  # The Taxonomicon
+taxo_resolve(["Nereis"]; within="Metazoa", source="ncbi")    # NCBI Taxonomy
+```
+
+:::
+
+`compare_sources()` accepts one `within` clade per source for this reason (see below).
+
+## Request limits and the NCBI API key
+
+Requests to each source are spaced independently, by at least the minimum interval (0.25 s by default; see [Settings](reference.qmd#settings)). The NCBI E-utilities allow three requests per second without an API key and ten with one, so NCBI requests are spaced by at least 0.4 s, or 0.12 s with a key. Refused requests (HTTP 429) are retried after a pause.
+
+An [NCBI API key](https://www.ncbi.nlm.nih.gov/books/NBK25497/) is free with an NCBI account. Set it in the `NCBI_API_KEY` environment variable, which the three implementations read, or in the session:
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+Sys.setenv(NCBI_API_KEY = "your-key")
+# or
+options(taxodist.ncbi_api_key = "your-key")
+```
+
+### Python
+
+```python
+import taxodist.sources
+taxodist.sources.NCBI_API_KEY = "your-key"
+```
+
+### Julia
+
+```julia
+Taxodist.NCBI_API_KEY[] = "your-key"
+```
+
+:::
+
+Keep the key out of scripts that you share; setting it in the environment avoids writing it in code.
+
+## How much does the classification matter? {#compare-sources}
+
+`compare_sources()` resolves the same names in several sources and reports how deep each lineage is in each one, and how well their distance matrices agree:
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```r
+cmp <- compare_sources(
+  c("Homo", "Pan", "Mus", "Gallus", "Danio", "Drosophila", "Quercus"),
+  sources = c("taxonomicon", "ott", "ncbi")
+)
+cmp            # summary
+cmp$taxa       # status, identifier, and lineage depth in each source
+cmp$agreement  # one row per pair of sources
+```
+
+### Python
+
+```python
+cmp = td.compare_sources(
+    ["Homo", "Pan", "Mus", "Gallus", "Danio", "Drosophila", "Quercus"],
+    sources=["taxonomicon", "ott", "ncbi"],
+    seed=1,
+)
+print(cmp)     # summary
+cmp.taxa       # status, identifier, and lineage depth in each source
+cmp.agreement  # one row per pair of sources
+```
+
+### Julia
+
+```julia
+using Random
+
+cmp = compare_sources(
+    ["Homo", "Pan", "Mus", "Gallus", "Danio", "Drosophila", "Quercus"];
+    sources=["taxonomicon", "ott", "ncbi"],
+    rng=Xoshiro(1),
+)
+cmp            # summary (REPL display)
+cmp.taxa       # status, identifier, and lineage depth in each source
+cmp.agreement  # one row per pair of sources
+```
+
+:::
+
+The input must contain at least three names (identifiers are specific to one source and are not accepted), and `sources` at least two sources. Names are resolved with `ambiguity = "first"` by default, so ambiguity is reported in the status columns rather than as warnings. `within` is one clade name for every source or one per source, for example `c(taxonomicon = "Animalia", ott = "Metazoa", ncbi = "Metazoa")` in R.
+
+### Interpreting the result
+
+- **`taxa`** has one row per input and, for every source, its status (`status_<source>`), selected identifier (`id_<source>`), and lineage depth (`depth_<source>`). Check the statuses first: a name that is `"unresolved"` or `"ambiguous"` in one source may refer to a different organism, or to none, there.
+- **`agreement`** has one row per pair of sources: the number of taxa compared (`n_taxa`, the taxa resolved in every source, listed in `shared`), the Spearman correlation between the two sets of pairwise distances (`spearman`), and the p-value of a Mantel permutation test (`p_value`). The test permutes the taxa of one matrix and reports the proportion of permutations whose correlation is at least the observed one, counting the observed arrangement: $(1 + \text{count}) / (1 + \text{permutations})$. Set `permutations = 0` to skip it.
+- **`matrices`** holds the distance matrices of every source restricted to the shared taxa, and **`resolutions`** the full resolutions.
+
+A correlation close to 1 means that the classifications rank the pairs of taxa in nearly the same order, so conclusions based on relative distances are robust to the choice of source. A low correlation points to parts of the tree of life that the classifications resolve differently, and the depth columns show where. Lineage depths, and therefore absolute distances, are not comparable across sources, because each classification resolves different groups to different degrees (The Taxonomicon is usually much deeper); compare correlations, not raw values. With few taxa the Mantel test has little power, and its p-value is limited by the number of distinct permutations.
+
+The p-values come from random permutations: use `set.seed()` in R, `seed` in Python, and `rng` in Julia for reproducible values. The permutations differ between languages, so p-values can differ slightly; the correlations, depths, and matrices are identical.
+
+## Homonyms and nominotypical subgenera
+
+A name can match several taxa. Since version 1.1.0, a candidate nested in another candidate of the same name is not counted as a homonym: the nominotypical subgenus *Mus (Mus)* lies inside the genus *Mus*, so `"Mus"` resolves to the genus with `status = "resolved"` instead of `"ambiguous"`, and no homonym warning is emitted. The same applies to names such as `"Oncorhynchus"` or `"Leishmania"`, and to subspecies with the same name as their species. The lineage is unchanged, since it was already truncated at the queried name. The rule applies in every source, in `taxo_resolve()`, and in the name-based functions.
+
+True homonyms, such as *Drosophila* (a fly and a fungus in the NCBI Taxonomy) or *Nereis* (a polychaete and a butterfly in The Taxonomicon), remain `"ambiguous"`. Restrict them with `within` or pass an identifier.
+
+## References
+
+Brands, S.J. (1989 onwards). *Systema Naturae 2000*. Amsterdam, The Netherlands. Retrieved from The Taxonomicon, <http://taxonomicon.taxonomy.nl>.
+
+Rees, J.A. & Cranston, K. (2017). Automated assembly of a reference taxonomy for phylogenetic data synthesis. *Biodiversity Data Journal* 5, e12581. <https://doi.org/10.3897/BDJ.5.e12581>
+
+Schoch, C.L. et al. (2020). NCBI Taxonomy: a comprehensive update on curation, resources and tools. *Database* 2020, baaa062. <https://doi.org/10.1093/database/baaa062>

@@ -13,7 +13,7 @@ The R package returns a standard `dist` object, allowing taxonomic hierarchy dis
 
 The examples use the fixed matrix distributed in `taxobase`. This avoids dependence on live network access and ensures that all analyses use the same taxon order and distance values.
 
-```r
+```{r}
 library(taxodist)
 
 data(taxobase, package = "taxodist")
@@ -36,7 +36,8 @@ For an empirical study, create the matrix from the taxa observed in the study an
 
 ## Hierarchical clustering
 
-```r
+```{r}
+#| fig-alt: "Average-linkage dendrogram of the 15 taxobase genera"
 cluster <- taxo_cluster(mat, method = "average")
 plot(cluster, main = "Clustering of taxonomic hierarchy distances")
 ```
