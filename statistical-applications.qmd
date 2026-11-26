@@ -1,6 +1,7 @@
 ---
 title: "Statistical Applications"
 subtitle: "Using taxonomic hierarchy distances in clustering, ordination, diversity analysis, and permutation-based models."
+description: "Using taxonomic hierarchy distances in clustering, ordination, diversity analysis, and permutation-based models."
 ---
 
 The R package returns a standard `dist` object, allowing taxonomic hierarchy distances to be used with established multivariate tools. This page illustrates several possibilities while emphasizing the assumptions required for scientific interpretation.

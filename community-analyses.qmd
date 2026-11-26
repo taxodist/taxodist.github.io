@@ -1,6 +1,7 @@
 ---
 title: "Community Analyses"
 subtitle: "Taxonomic dissimilarity between samples (Γ+ and Θ+) and standardized effect sizes of community structure (NRI and NTI)."
+description: "Taxonomic dissimilarity between samples (Γ+ and Θ+) and standardized effect sizes of community structure (NRI and NTI)."
 ---
 
 Version 1.1.0 adds two community analyses built on taxonomic distances: `taxo_dissimilarity()` compares the taxonomic composition of samples, and `taxo_ses()` tests whether the taxa of a sample are more or less closely related than expected by chance. Both accept a distance matrix from any metric and any [source](sources.qmd), and complement the taxonomic distinctness indices of `taxo_distinctness()` (see [Statistical Applications](statistical-applications.qmd)).

@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A browser interface to taxodist for exploring lineages and distances without writing code.">
 
 <title>Web app – taxodist</title>
 <style>
@@ -258,6 +259,10 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./images/logo-nav.png" alt="taxodist logo" class="navbar-logo light-content">
+    <img src="./images/logo-nav.png" alt="taxodist logo" class="navbar-logo dark-content">
+    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">taxodist</span>
     </a>
@@ -364,8 +369,6 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#what-you-can-do" id="toc-what-you-can-do" class="nav-link active" data-scroll-target="#what-you-can-do">What you can do</a></li>
-  <li><a href="#version-1.0-features" id="toc-version-1.0-features" class="nav-link" data-scroll-target="#version-1.0-features">Version 1.0 features</a></li>
-  <li><a href="#not-yet-in-the-app-version-1.1.0-features" id="toc-not-yet-in-the-app-version-1.1.0-features" class="nav-link" data-scroll-target="#not-yet-in-the-app-version-1.1.0-features">Not yet in the app: version 1.1.0 features</a></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
   </ul>
 </nav>
@@ -380,6 +383,11 @@ ul.task-list li input[type="checkbox"] {
 <p class="subtitle lead">A browser interface to taxodist for exploring lineages and distances without writing code.</p>
 </div>
 
+<div>
+  <div class="description">
+    A browser interface to taxodist for exploring lineages and distances without writing code.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -394,16 +402,12 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>The <a href="https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/">taxodist web application</a> is a <a href="https://shiny.posit.co/">Shiny</a> front end to the R package. It queries The Taxonomicon through the CRAN release of <code>taxodist</code>, so its results follow the same lineage parser and distance definitions as the packages. The interface is available in English, Portuguese, Spanish, French, and German.</p>
+<p>The <a href="https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/">taxodist web application</a> is a <a href="https://shiny.posit.co/">Shiny</a> front end to the R package. It runs the CRAN release of <code>taxodist</code> (1.1.0), so its results follow the same lineage parser and distance definitions as the packages. Lineages come from The Taxonomicon by default, or from the Open Tree Taxonomy or the NCBI Taxonomy, chosen in the settings bar (see <a href="./sources.html">Taxonomic sources</a>). The interface is available in English, Portuguese, Spanish, French, and German.</p>
 <p><a href="https://3w6g1b-rodrigo-villa.shinyapps.io/taxodist_app/" class="btn btn-primary" role="button">Open the web app</a></p>
 <section id="what-you-can-do" class="level2">
 <h2 class="anchored" data-anchor-id="what-you-can-do">What you can do</h2>
 <p>The app is organized in tabs, each corresponding to a common task:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Tab</th>
@@ -428,38 +432,48 @@ ul.task-list li input[type="checkbox"] {
 <td>Candidates ranked by taxonomic proximity to a query taxon</td>
 </tr>
 <tr class="odd">
-<td>Lineage Explorer</td>
-<td>Full lineage of a taxon, with clade membership checks</td>
+<td>Distinctness</td>
+<td>Taxonomic diversity and distinctness indices of Clarke and Warwick for one or more samples</td>
 </tr>
 <tr class="even">
+<td>Community analyses</td>
+<td>Taxonomic dissimilarity between samples (Γ+, Θ+) and standardized effect sizes (NRI, NTI); see <a href="./community-analyses.html">Community analyses</a></td>
+</tr>
+<tr class="odd">
+<td>Compare sources</td>
+<td>How much the distances among a set of taxa change between The Taxonomicon, the Open Tree Taxonomy, and the NCBI Taxonomy; see <a href="./sources.html">Taxonomic sources</a></td>
+</tr>
+<tr class="even">
+<td>Lineage Explorer</td>
+<td>Full lineage of a taxon, with node ranks and clade membership checks</td>
+</tr>
+<tr class="odd">
 <td>Search Database</td>
 <td>Candidate records and numeric identifiers from The Taxonomicon</td>
 </tr>
-<tr class="odd">
-<td>Coverage Check</td>
-<td>Which names in a list are found in The Taxonomicon</td>
-</tr>
 <tr class="even">
+<td>Coverage Check</td>
+<td>Which names in a list are found in the selected source</td>
+</tr>
+<tr class="odd">
 <td>Filter by Clade</td>
 <td>Members of a list that belong to a given clade</td>
 </tr>
+<tr class="even">
+<td>Bundles</td>
+<td>Upload analysis bundles to inspect them or compare two of them</td>
+</tr>
 </tbody>
 </table>
+<p>The settings bar applies to every tab: the <strong>distance metric</strong> (reciprocal, path length, Wu–Palmer, or rank-based), the <strong>taxonomic source</strong>, and an optional clade that restricts name matching. Each result includes a <strong>resolution audit</strong> showing how every name was matched, the source and retrieval date, and the citation of the source.</p>
 <p>Results can be downloaded as CSV tables, PNG plots, Newick trees, and portable analysis bundles (JSON, see <a href="./bundle-format.html">Bundle format</a>), and many queries can be shared with a link that reopens them.</p>
-</section>
-<section id="version-1.0-features" class="level2">
-<h2 class="anchored" data-anchor-id="version-1.0-features">Version 1.0 features</h2>
-<p>The app is being updated to the 1.0.0 packages. The update adds <strong>metric selection</strong>, a <strong>resolution audit</strong> of how each name was matched, <strong>taxonomic distinctness</strong>, and <strong>bundles</strong> that can be uploaded and compared, as well as node ranks. These features are being rolled out gradually and may not all be visible in the deployed app yet; the R, Python, and Julia packages provide all of them today (see the <a href="./getting-started.html">guide</a>).</p>
-</section>
-<section id="not-yet-in-the-app-version-1.1.0-features" class="level2">
-<h2 class="anchored" data-anchor-id="not-yet-in-the-app-version-1.1.0-features">Not yet in the app: version 1.1.0 features</h2>
-<p>The app runs the version of the R package published on CRAN, so it does not yet offer the features added in version 1.1.0: lineages from the <a href="./sources.html">Open Tree and NCBI taxonomies</a> (the app always queries The Taxonomicon), <code>compare_sources()</code>, and the <a href="./community-analyses.html">community analyses</a> <code>taxo_dissimilarity()</code> and <code>taxo_ses()</code>. Use the R, Python, or Julia packages for them.</p>
 </section>
 <section id="limitations" class="level2">
 <h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
 <ul>
-<li>The app is hosted on a shared <a href="https://www.shinyapps.io/">shinyapps.io</a> instance. It may take a few seconds to start, and long lists are slower than in a local session because requests to The Taxonomicon are deliberately spaced.</li>
-<li>Live results depend on the current state of The Taxonomicon. For analyses that must be reproduced later, download the analysis bundle, or use the packages directly and record the package version, retrieval date, and numeric identifiers.</li>
+<li>The app is hosted on a shared <a href="https://www.shinyapps.io/">shinyapps.io</a> instance. It may take a few seconds to start, and long lists are slower than in a local session because requests to each source are deliberately spaced. Lists are limited in size (for example, 50 taxa in Compare sources and 30 samples and 100 taxa in Community analyses), and the independent-swap null model of <code>taxo_ses()</code> uses at most 99 random communities.</li>
+<li>When The Taxonomicon cannot be reached, choose the Open Tree Taxonomy or the NCBI Taxonomy in the settings bar; names already in the app’s cache still work.</li>
+<li>Live results depend on the current state of the selected source. For analyses that must be reproduced later, download the analysis bundle, or use the packages directly and record the package version, retrieval date, and numeric identifiers.</li>
 <li>For large or scripted analyses, use the <a href="./getting-started.html">R, Python, or Julia packages</a>.</li>
 </ul>
 

@@ -1,6 +1,7 @@
 ---
 title: "About taxodist"
 subtitle: "Project scope, authorship, citation, and licensing."
+description: "Project scope, authorship, citation, and licensing."
 ---
 
 ## Project scope

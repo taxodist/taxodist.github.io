@@ -1,6 +1,7 @@
 ---
 title: "Methodology"
 subtitle: "Definition, mathematical properties, assumptions, and limitations of the taxodist hierarchy distance."
+description: "Definition, mathematical properties, assumptions, and limitations of the taxodist hierarchy distance."
 ---
 
 ## Scope

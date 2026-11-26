@@ -1,5 +1,7 @@
 ---
 title: ""
+pagetitle: "taxodist: taxonomic hierarchy distances in R, Python, and Julia"
+description: "Open-source R, Python, and Julia packages that compute distances between taxa from the depth of their most recent common ancestor in The Taxonomicon, the Open Tree Taxonomy, or the NCBI Taxonomy, with taxonomic distinctness, dissimilarity, and community analyses."
 toc: false
 ---
 

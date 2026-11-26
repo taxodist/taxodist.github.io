@@ -1,6 +1,7 @@
 ---
 title: "Taxonomic Sources"
 subtitle: "Retrieving lineages from The Taxonomicon, the Open Tree Taxonomy, or the NCBI Taxonomy, and measuring how much an analysis depends on the classification."
+description: "Retrieving lineages from The Taxonomicon, the Open Tree Taxonomy, or the NCBI Taxonomy, and measuring how much an analysis depends on the classification."
 ---
 
 A taxonomic distance is a property of the classification it is computed from. Since version 1.1.0, `taxodist` can retrieve lineages from three classifications, and `compare_sources()` measures how much the distances among a set of taxa change from one classification to another.

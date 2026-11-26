@@ -1,6 +1,7 @@
 ---
 title: "Changelog"
 subtitle: "Release history for taxodist, newest first, from version 1.1.0 back to version 0.1.0."
+description: "Release history for taxodist, newest first, from version 1.1.0 back to version 0.1.0."
 ---
 
 Releases are listed newest first. Dates are the publication dates on CRAN (R) and PyPI (Python); the Julia package is distributed through the [General registry](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist) from version 0.6.0 onwards. The earliest Python release listed on PyPI is 0.3.0.
@@ -16,7 +17,7 @@ Validation and benchmark notes for earlier releases are kept in the [archive](#a
 Lineages can now come from three classifications, the dependence of an analysis on the classification can be measured, and community analyses gain taxonomic dissimilarity between samples and standardized effect sizes. The distance metrics and the bundle format (schema 1.1) are unchanged: distances computed from The Taxonomicon are identical to version 1.0.0 (except for the rare pages without a structured hierarchy; see Corrections), and bundles written by either version are read by both.
 
 ::: {.release-dates}
-**Release date to be confirmed** — R, Python, and Julia
+**Released** — R: 2026-11-26 on [CRAN](https://cran.r-project.org/package=taxodist) · Python: 2026-11-25 on [PyPI](https://pypi.org/project/taxodist/1.1.0/) · Julia: registered in [Julia General](https://github.com/JuliaRegistries/General/tree/master/T/Taxodist)
 :::
 
 ### New taxonomic sources

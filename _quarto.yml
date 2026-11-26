@@ -16,6 +16,8 @@ website:
   page-navigation: true
   back-to-top-navigation: true
   navbar:
+    logo: images/logo-nav.png
+    logo-alt: "taxodist logo"
     background: "#5c3d1e"
     pinned: true
     search: true

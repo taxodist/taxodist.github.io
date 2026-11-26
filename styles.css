@@ -107,6 +107,13 @@ h3 {
   letter-spacing: -0.02em;
 }
 
+/* The same hex logo as the web app, beside the site title. */
+.navbar-brand .navbar-logo {
+  max-height: 34px;
+  width: auto;
+  margin-right: 0.15rem;
+}
+
 .navbar .nav-link:hover,
 .navbar .nav-link:focus {
   color: #e5d6c5 !important;

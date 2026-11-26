@@ -1,6 +1,7 @@
 ---
 title: "Bundle format"
 subtitle: "The portable JSON record shared by the R, Python, and Julia implementations: schema 1.1."
+description: "The portable JSON record shared by the R, Python, and Julia implementations: schema 1.1."
 ---
 
 ```{r}

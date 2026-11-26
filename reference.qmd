@@ -1,6 +1,7 @@
 ---
 title: "Function Reference"
 subtitle: "Public API for taxodist 1.1.0 in R, Python, and Julia."
+description: "Public API for taxodist 1.1.0 in R, Python, and Julia."
 ---
 
 The R, Python, and Julia implementations share the same distance semantics and principal function names. Native return types follow the conventions of each language.

@@ -1,6 +1,7 @@
 ---
 title: "Introduction to taxodist"
 subtitle: "Retrieve ordered taxonomic lineages and compare hierarchy nodes in R, Python, or Julia."
+description: "Retrieve ordered taxonomic lineages and compare hierarchy nodes in R, Python, or Julia."
 ---
 
 ```{r}

@@ -1,6 +1,7 @@
 ---
 title: "Cross-language Compatibility"
 subtitle: "Shared semantics, native return types, and reproducible workflows in R, Python, and Julia."
+description: "Shared semantics, native return types, and reproducible workflows in R, Python, and Julia."
 ---
 
 ## Compatibility contract
