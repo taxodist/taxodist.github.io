@@ -16,7 +16,9 @@ website:
   page-navigation: true
   back-to-top-navigation: true
   navbar:
-    logo: images/logo-nav.png
+    logo:
+      light: images/logo-nav-light.png
+      dark: images/logo-nav-dark.png
     logo-alt: "taxodist logo"
     background: "#5c3d1e"
     pinned: true
@@ -76,6 +78,7 @@ format:
     theme:
       light: flatly
       dark: darkly
+    respect-user-color-scheme: true
     css: styles.css
     toc: true
     toc-title: "Contents"
